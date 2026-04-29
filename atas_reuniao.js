@@ -22,6 +22,10 @@ function doGet(e) {
     const area = e.parameter.area || "";
     return _json(buscarParticipantesArea(area));
   }
+  if (action === "padrao_area") {
+    const area = e.parameter.area || "";
+    return _json(buscarNomesPadraoArea(area));
+  }
   if (action === "todos_participantes") {
     return _json(buscarTodosParticipantes());
   }
@@ -64,16 +68,29 @@ function doPost(e) {
 // ============================================================
 // PARTICIPANTES
 // ============================================================
-function buscarParticipantesArea(area) {
+// Retorna os NOMES padrão de uma área (colunas F-O da aba Configurações)
+function buscarNomesPadraoArea(area) {
   const ss  = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const aba = ss.getSheetByName("Participantes");
+  const aba = ss.getSheetByName("Configurações");
   if (!aba) return [];
-  return aba.getDataRange().getValues()
-    .slice(1)
-    .filter(r => r[0] === area && r[1])
-    .map(r => ({ nome: String(r[1]).trim(), telefone: String(r[2]||"").trim(), email: String(r[3]||"").trim() }));
+  const linha = aba.getDataRange().getValues().slice(1).find(r => String(r[0]).trim() === area);
+  if (!linha) return [];
+  // Colunas F-O = índices 5 a 14
+  return linha.slice(5, 15).map(v => String(v).trim()).filter(v => v);
 }
 
+// Retorna participantes de uma área com contato completo
+// Lê os nomes padrão da Configurações e busca o contato na aba Participantes
+function buscarParticipantesArea(area) {
+  const nomes = buscarNomesPadraoArea(area);
+  if (!nomes.length) return [];
+  const todos = buscarTodosParticipantes();
+  return nomes
+    .map(nome => todos.find(p => p.nome === nome) || { nome, telefone: "", email: "" })
+    .filter(p => p.nome);
+}
+
+// Retorna todos os participantes da aba Participantes (ordem alfabética, sem duplicatas)
 function buscarTodosParticipantes() {
   const ss  = SpreadsheetApp.openById(SPREADSHEET_ID);
   const aba = ss.getSheetByName("Participantes");

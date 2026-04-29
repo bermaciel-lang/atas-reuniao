@@ -234,27 +234,36 @@ function StepParticipantes({form,upd}){
   const [fixos, setFixos]           = React.useState([]);
   const carregouRef                 = React.useRef(false);
 
-  // Carrega TODOS os participantes da planilha (uma única vez)
+  // Carrega TODOS os participantes uma única vez
   React.useEffect(()=>{
     if(carregouRef.current) return;
     carregouRef.current = true;
     setCarregando(true);
     fetch(`${APP_SCRIPT_URL}?action=todos_participantes`)
       .then(r=>r.json())
-      .then(lista=>{
-        // Todos desmarcados por padrão
-        setFixos(lista.map(p=>({...p, selecionado:false})));
-        upd("participantes", []);
-      })
+      .then(lista=>{ setFixos(lista.map(p=>({...p, selecionado:false}))); upd("participantes",[]); })
       .catch(()=>{ setFixos([]); })
       .finally(()=>setCarregando(false));
   },[]);
 
+  // Quando a área muda, pré-marca os participantes obrigatórios
+  React.useEffect(()=>{
+    if(!form.area || !fixos.length) return;
+    fetch(`${APP_SCRIPT_URL}?action=padrao_area&area=${encodeURIComponent(form.area)}`)
+      .then(r=>r.json())
+      .then(nomes=>{
+        const nomesSet = new Set(nomes.map(n=>n.trim()));
+        const atualizados = fixos.map(p=>({...p, selecionado: nomesSet.has(p.nome)}));
+        setFixos(atualizados);
+        setExtras([]);
+        sincronizar(atualizados,[]);
+      })
+      .catch(()=>{});
+  },[form.area]);
+
   function toggleFixo(i){
-    const n=[...fixos];
-    n[i]={...n[i],selecionado:!n[i].selecionado};
-    setFixos(n);
-    sincronizar(n,extras);
+    const n=[...fixos]; n[i]={...n[i],selecionado:!n[i].selecionado};
+    setFixos(n); sincronizar(n,extras);
   }
 
   function addExtra(){ setExtras(e=>[...e,{nome:"",telefone:"",email:"",selecionado:true}]); }
@@ -269,14 +278,14 @@ function StepParticipantes({form,upd}){
     upd("participantes",selecionados);
   }
 
-  const selecionados = fixos.filter(p=>p.selecionado).length + extras.filter(p=>p.nome.trim()).length;
+  const qtdSelecionados = fixos.filter(p=>p.selecionado).length + extras.filter(p=>p.nome.trim()).length;
 
   return (
     <div>
       <div className="step-heading">Participantes</div>
       <div className="step-hint">
-        Marque quem participou desta reunião.
-        {selecionados > 0 && <strong style={{color:"var(--green)"}}> {selecionados} selecionado(s).</strong>}
+        Os participantes obrigatórios já estão marcados. Desmarque quem não veio ou adicione alguém extra.
+        {qtdSelecionados > 0 && <strong style={{color:"var(--green)"}}> {qtdSelecionados} selecionado(s).</strong>}
       </div>
 
       {carregando && <div className="carregando-txt">Carregando participantes…</div>}
