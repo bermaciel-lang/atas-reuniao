@@ -37,7 +37,6 @@
     body { background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; min-height: 100vh; }
     #root { min-height: 100vh; display: flex; flex-direction: column; }
 
-    /* ── Header ─────────────────────────────── */
     .hdr { background: var(--green); padding: 14px 18px 12px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20; }
     .hdr-icon { width: 38px; height: 38px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
     .hdr-title { color: #fff; font-size: 16px; font-weight: 700; line-height: 1.2; }
@@ -45,23 +44,19 @@
     .progress-track { height: 3px; background: rgba(255,255,255,0.2); }
     .progress-fill { height: 100%; background: #fff; transition: width 0.35s cubic-bezier(.4,0,.2,1); }
 
-    /* ── Steps nav ───────────────────────────── */
     .steps-row { background: var(--white); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; gap: 0; }
     .step-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: default; position: relative; }
     .step-item.clickable { cursor: pointer; }
-    .step-item + .step-item::before { content: ''; position: absolute; left: 0; top: 14px; width: 1px; height: 1px; background: transparent; }
     .step-bubble { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 2px solid var(--border); color: var(--muted); background: var(--white); transition: all 0.2s; }
     .step-bubble.done  { background: var(--green); border-color: var(--green); color: #fff; }
     .step-bubble.active { border-color: var(--green); color: var(--green); background: var(--green-light); }
     .step-name { font-size: 10px; color: var(--muted); text-align: center; }
     .step-name.active { color: var(--green); font-weight: 700; }
 
-    /* ── Content area ────────────────────────── */
     .content { flex: 1; padding: 20px 18px; max-width: 500px; margin: 0 auto; width: 100%; }
     .step-heading { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; letter-spacing: -0.3px; }
     .step-hint { font-size: 14px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
 
-    /* ── Fields ──────────────────────────────── */
     .field { margin-bottom: 14px; }
     .field:last-child { margin-bottom: 0; }
     .lbl { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.07em; }
@@ -77,10 +72,7 @@
       box-shadow: 0 0 0 3px rgba(26,92,53,0.12);
     }
     textarea { resize: vertical; min-height: 84px; line-height: 1.55; }
-    .two-col { display: flex; gap: 10px; }
-    .two-col > .field { flex: 1; }
 
-    /* ── Cards (participantes, ações) ─────────── */
     .card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px 14px 14px; margin-bottom: 10px; position: relative; box-shadow: var(--shadow); }
     .card-badge { position: absolute; top: -1px; left: 14px; background: var(--green); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 9px; border-radius: 0 0 7px 7px; text-transform: uppercase; letter-spacing: 0.05em; }
     .card-body { margin-top: 16px; }
@@ -90,7 +82,6 @@
     .add-btn { width: 100%; background: none; border: 2px dashed var(--border); border-radius: var(--radius); padding: 13px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; margin-top: 2px; }
     .add-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-pale); }
 
-    /* ── Nav buttons ─────────────────────────── */
     .nav { display: flex; gap: 10px; margin-top: 24px; padding-bottom: 36px; }
     .btn-back { flex: 0 0 80px; padding: 14px; border: 1.5px solid var(--border); border-radius: var(--radius); background: none; font-size: 15px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: background 0.15s; }
     .btn-back:hover { background: var(--bg); }
@@ -99,7 +90,6 @@
     .btn-next:active:not(:disabled) { transform: scale(0.98); }
     .btn-next:disabled { background: #9ca3af; cursor: not-allowed; }
 
-    /* ── Revisão ──────────────────────────────── */
     .rev-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
     .rev-section-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green); margin-bottom: 10px; }
     .rev-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--bg); font-size: 14px; }
@@ -111,7 +101,6 @@
     .rev-item-t { font-weight: 600; color: var(--text); font-size: 14px; }
     .rev-item-s { color: var(--muted); font-size: 12px; margin-top: 3px; }
 
-    /* ── Sucesso ──────────────────────────────── */
     .ok-screen { text-align: center; padding: 48px 24px; }
     .ok-circle { width: 80px; height: 80px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; }
     .ok-title { font-size: 26px; font-weight: 800; color: var(--text); margin-bottom: 10px; letter-spacing: -0.4px; }
@@ -121,14 +110,11 @@
     .new-btn { width: 100%; background: none; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 15px; color: var(--muted); cursor: pointer; font-family: inherit; font-weight: 600; transition: background 0.15s; }
     .new-btn:hover { background: var(--bg); }
 
-    /* ── Error ───────────────────────────────── */
     .err { background: var(--red-light); border: 1.5px solid #fecaca; color: var(--red); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; margin-bottom: 12px; font-weight: 500; }
 
-    /* ── Spinner ─────────────────────────────── */
     .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Dark mode ───────────────────────────── */
     @media (prefers-color-scheme: dark) {
       :root { --bg: #111827; --white: #1f2937; --text: #f9fafb; --muted: #9ca3af; --border: #374151; --green-light: #052e16; --green-pale: #041f10; --shadow: 0 1px 3px rgba(0,0,0,0.3); }
       input, textarea, select { background: #111827; color: #f9fafb; }
@@ -139,19 +125,16 @@
 <div id="root"></div>
 
 <script type="text/babel">
-/* =====================================================
-   ⚙️  CONFIGURAÇÃO — cole a URL do App Script abaixo
-   ===================================================== */
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT7ZNgVeFPAsLufZMyzPvloarQngJCKkMzE7QOlxxO7ZlUU2f_DOH081IfR2bLyJkf/exec";
 
-/* ─────────────────────────────────────────────────── */
+const AREAS = ["Operação", "Atendimento", "Compras", "Financeiro/Fiscal", "Entregadores", "Geral"];
 
 const STEPS = [
-  { id: "reuniao",       label: "Reunião"      },
-  { id: "participantes", label: "Pessoas"       },
-  { id: "assuntos",      label: "Assuntos"      },
-  { id: "acoes",         label: "Ações"         },
-  { id: "revisar",       label: "Revisar"       },
+  { id: "reuniao",       label: "Reunião"   },
+  { id: "participantes", label: "Pessoas"   },
+  { id: "assuntos",      label: "Assuntos"  },
+  { id: "acoes",         label: "Ações"     },
+  { id: "revisar",       label: "Revisar"   },
 ];
 
 function App() {
@@ -162,7 +145,8 @@ function App() {
   const [erro, setErro]       = React.useState("");
 
   const [form, setForm] = React.useState({
-    tipo: "", data: hoje(), hora: horaAgora(), local: "",
+    area: "",
+    data: hoje(),
     participantes: [{ nome: "", telefone: "" }],
     topicos:       [""],
     acoes:         [{ descricao: "", responsavel: "", prazo: "" }],
@@ -182,13 +166,15 @@ function App() {
         return { ...a, responsavelNome: p?.nome || "", responsavelTelefone: p?.telefone || "" };
       });
       const payload = {
-        ...form,
-        acoes:   acoesFull.filter(a => a.descricao.trim()),
+        tipo:   form.area,
+        data:   form.data,
+        participantes: form.participantes,
         topicos: form.topicos.filter(t => t.trim()),
+        acoes:   acoesFull.filter(a => a.descricao.trim()),
       };
-      const r    = await fetch(APP_SCRIPT_URL, {
+      // ✅ CORS fix: sem Content-Type header
+      const r = await fetch(APP_SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const json = await r.json();
@@ -201,7 +187,7 @@ function App() {
   }
 
   function resetar() {
-    setForm({ tipo: "", data: hoje(), hora: horaAgora(), local: "", participantes: [{ nome: "", telefone: "" }], topicos: [""], acoes: [{ descricao: "", responsavel: "", prazo: "" }] });
+    setForm({ area: "", data: hoje(), participantes: [{ nome: "", telefone: "" }], topicos: [""], acoes: [{ descricao: "", responsavel: "", prazo: "" }] });
     setEnviado(false); setLink(""); setErro(""); setStep(0);
   }
 
@@ -258,9 +244,7 @@ function App() {
             <button className="btn-back" onClick={() => setStep(s => s - 1)}>← Voltar</button>
           )}
           {step < STEPS.length - 1 ? (
-            <button className="btn-next" onClick={() => setStep(s => s + 1)}>
-              Continuar →
-            </button>
+            <button className="btn-next" onClick={() => setStep(s => s + 1)}>Continuar →</button>
           ) : (
             <button className="btn-next" onClick={enviar} disabled={enviando}>
               {enviando ? <><span className="spinner" />Enviando...</> : "✓ Finalizar e enviar ata"}
@@ -284,38 +268,28 @@ function Header() {
   );
 }
 
-/* ── ETAPA 1 — Dados da reunião ─────────────────── */
 function StepReuniao({ form, upd }) {
   return (
     <div>
       <div className="step-heading">Sobre a reunião</div>
-      <div className="step-hint">Preencha as informações básicas desta reunião.</div>
+      <div className="step-hint">Selecione a área e a data desta reunião.</div>
 
       <div className="field">
-        <label className="lbl">Tipo de reunião</label>
-        <input type="text" placeholder="Ex: Semanal operacional, Diretoria, Compras…" value={form.tipo} onChange={e => upd("tipo", e.target.value)} />
-      </div>
-
-      <div className="two-col">
-        <div className="field">
-          <label className="lbl">Data</label>
-          <input type="date" value={form.data} onChange={e => upd("data", e.target.value)} />
-        </div>
-        <div className="field">
-          <label className="lbl">Hora</label>
-          <input type="time" value={form.hora} onChange={e => upd("hora", e.target.value)} />
-        </div>
+        <label className="lbl">Área</label>
+        <select value={form.area} onChange={e => upd("area", e.target.value)}>
+          <option value="">Selecionar área…</option>
+          {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
+        </select>
       </div>
 
       <div className="field">
-        <label className="lbl">Local ou link</label>
-        <input type="text" placeholder="Ex: Sala de reuniões, Meet, Teams…" value={form.local} onChange={e => upd("local", e.target.value)} />
+        <label className="lbl">Data</label>
+        <input type="date" value={form.data} onChange={e => upd("data", e.target.value)} />
       </div>
     </div>
   );
 }
 
-/* ── ETAPA 2 — Participantes ─────────────────────── */
 function StepParticipantes({ form, upd }) {
   const ps = form.participantes;
   function add()       { upd("participantes", [...ps, { nome: "", telefone: "" }]); }
@@ -348,12 +322,11 @@ function StepParticipantes({ form, upd }) {
   );
 }
 
-/* ── ETAPA 3 — Assuntos discutidos ───────────────── */
 function StepAssuntos({ form, upd }) {
   const ts = form.topicos;
-  function add()       { upd("topicos", [...ts, ""]); }
-  function remove(i)   { upd("topicos", ts.filter((_, j) => j !== i)); }
-  function edit(i, v)  { const n=[...ts]; n[i]=v; upd("topicos",n); }
+  function add()      { upd("topicos", [...ts, ""]); }
+  function remove(i)  { upd("topicos", ts.filter((_, j) => j !== i)); }
+  function edit(i, v) { const n=[...ts]; n[i]=v; upd("topicos",n); }
 
   return (
     <div>
@@ -365,11 +338,7 @@ function StepAssuntos({ form, upd }) {
           <div className="card-badge">Assunto {i + 1}</div>
           {ts.length > 1 && <button className="rm-btn" onClick={() => remove(i)}>×</button>}
           <div className="card-body">
-            <textarea
-              placeholder="Descreva o que foi discutido…"
-              value={t}
-              onChange={e => edit(i, e.target.value)}
-            />
+            <textarea placeholder="Descreva o que foi discutido…" value={t} onChange={e => edit(i, e.target.value)} />
           </div>
         </div>
       ))}
@@ -378,7 +347,6 @@ function StepAssuntos({ form, upd }) {
   );
 }
 
-/* ── ETAPA 4 — Ações ─────────────────────────────── */
 function StepAcoes({ form, upd }) {
   const as = form.acoes;
   function add()       { upd("acoes", [...as, { descricao: "", responsavel: "", prazo: "" }]); }
@@ -397,12 +365,7 @@ function StepAcoes({ form, upd }) {
           <div className="card-body">
             <div className="field">
               <label className="lbl">O que precisa ser feito?</label>
-              <textarea
-                placeholder="Descreva a ação de forma clara…"
-                value={a.descricao}
-                onChange={e => edit(i, "descricao", e.target.value)}
-                style={{ minHeight: 70 }}
-              />
+              <textarea placeholder="Descreva a ação de forma clara…" value={a.descricao} onChange={e => edit(i, "descricao", e.target.value)} style={{ minHeight: 70 }} />
             </div>
             <div className="field">
               <label className="lbl">Responsável</label>
@@ -425,7 +388,6 @@ function StepAcoes({ form, upd }) {
   );
 }
 
-/* ── ETAPA 5 — Revisar ───────────────────────────── */
 function StepRevisar({ form }) {
   const d = s => s ? new Date(s + "T12:00:00").toLocaleDateString("pt-BR") : "—";
 
@@ -436,9 +398,8 @@ function StepRevisar({ form }) {
 
       <div className="rev-card">
         <div className="rev-section-label">Reunião</div>
-        <div className="rev-row"><span className="rev-k">Tipo</span><span className="rev-v">{form.tipo || "—"}</span></div>
-        <div className="rev-row"><span className="rev-k">Data e hora</span><span className="rev-v">{d(form.data)} às {form.hora}</span></div>
-        <div className="rev-row"><span className="rev-k">Local</span><span className="rev-v">{form.local || "—"}</span></div>
+        <div className="rev-row"><span className="rev-k">Área</span><span className="rev-v">{form.area || "—"}</span></div>
+        <div className="rev-row"><span className="rev-k">Data</span><span className="rev-v">{d(form.data)}</span></div>
       </div>
 
       <div className="rev-card">
@@ -476,9 +437,7 @@ function StepRevisar({ form }) {
   );
 }
 
-/* ── Utilitários ─────────────────────────────────── */
-function hoje()     { return new Date().toISOString().split("T")[0]; }
-function horaAgora(){ return new Date().toTimeString().slice(0, 5); }
+function hoje() { return new Date().toISOString().split("T")[0]; }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
