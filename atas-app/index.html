@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Atas de Reunião — Orgânico do Chico</title>
+  <meta name="description" content="Sistema de atas de reunião do Orgânico do Chico">
+  <meta name="theme-color" content="#1a5c35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Atas">
+  <link rel="manifest" href="/manifest.json">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --green:       #1a5c35;
+      --green-dark:  #0f3620;
+      --green-mid:   #2d7a4a;
+      --green-light: #e8f5ee;
+      --green-pale:  #f0faf4;
+      --text:        #111827;
+      --muted:       #6b7280;
+      --border:      #e5e7eb;
+      --bg:          #f3f4f6;
+      --white:       #ffffff;
+      --red:         #dc2626;
+      --red-light:   #fef2f2;
+      --radius:      14px;
+      --radius-sm:   9px;
+      --shadow:      0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; min-height: 100vh; }
+    #root { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Header ─────────────────────────────── */
+    .hdr { background: var(--green); padding: 14px 18px 12px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20; }
+    .hdr-icon { width: 38px; height: 38px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .hdr-title { color: #fff; font-size: 16px; font-weight: 700; line-height: 1.2; }
+    .hdr-sub { color: rgba(255,255,255,0.65); font-size: 12px; }
+    .progress-track { height: 3px; background: rgba(255,255,255,0.2); }
+    .progress-fill { height: 100%; background: #fff; transition: width 0.35s cubic-bezier(.4,0,.2,1); }
+
+    /* ── Steps nav ───────────────────────────── */
+    .steps-row { background: var(--white); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; gap: 0; }
+    .step-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: default; position: relative; }
+    .step-item.clickable { cursor: pointer; }
+    .step-item + .step-item::before { content: ''; position: absolute; left: 0; top: 14px; width: 1px; height: 1px; background: transparent; }
+    .step-bubble { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 2px solid var(--border); color: var(--muted); background: var(--white); transition: all 0.2s; }
+    .step-bubble.done  { background: var(--green); border-color: var(--green); color: #fff; }
+    .step-bubble.active { border-color: var(--green); color: var(--green); background: var(--green-light); }
+    .step-name { font-size: 10px; color: var(--muted); text-align: center; }
+    .step-name.active { color: var(--green); font-weight: 700; }
+
+    /* ── Content area ────────────────────────── */
+    .content { flex: 1; padding: 20px 18px; max-width: 500px; margin: 0 auto; width: 100%; }
+    .step-heading { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; letter-spacing: -0.3px; }
+    .step-hint { font-size: 14px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+
+    /* ── Fields ──────────────────────────────── */
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .lbl { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.07em; }
+    input[type=text], input[type=date], input[type=time], input[type=tel], textarea, select {
+      width: 100%; padding: 13px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 16px; font-family: inherit; background: var(--white); color: var(--text);
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(26,92,53,0.12);
+    }
+    textarea { resize: vertical; min-height: 84px; line-height: 1.55; }
+    .two-col { display: flex; gap: 10px; }
+    .two-col > .field { flex: 1; }
+
+    /* ── Cards (participantes, ações) ─────────── */
+    .card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px 14px 14px; margin-bottom: 10px; position: relative; box-shadow: var(--shadow); }
+    .card-badge { position: absolute; top: -1px; left: 14px; background: var(--green); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 9px; border-radius: 0 0 7px 7px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card-body { margin-top: 16px; }
+    .rm-btn { position: absolute; top: 8px; right: 10px; width: 28px; height: 28px; border-radius: 50%; background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; }
+    .rm-btn:hover { background: var(--red-light); color: var(--red); }
+
+    .add-btn { width: 100%; background: none; border: 2px dashed var(--border); border-radius: var(--radius); padding: 13px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; margin-top: 2px; }
+    .add-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-pale); }
+
+    /* ── Nav buttons ─────────────────────────── */
+    .nav { display: flex; gap: 10px; margin-top: 24px; padding-bottom: 36px; }
+    .btn-back { flex: 0 0 80px; padding: 14px; border: 1.5px solid var(--border); border-radius: var(--radius); background: none; font-size: 15px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: background 0.15s; }
+    .btn-back:hover { background: var(--bg); }
+    .btn-next { flex: 1; padding: 14px; border: none; border-radius: var(--radius); background: var(--green); font-size: 16px; font-weight: 700; color: #fff; cursor: pointer; font-family: inherit; transition: background 0.15s, transform 0.1s; letter-spacing: 0.01em; }
+    .btn-next:hover:not(:disabled) { background: var(--green-mid); }
+    .btn-next:active:not(:disabled) { transform: scale(0.98); }
+    .btn-next:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    /* ── Revisão ──────────────────────────────── */
+    .rev-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
+    .rev-section-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green); margin-bottom: 10px; }
+    .rev-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--bg); font-size: 14px; }
+    .rev-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .rev-k { color: var(--muted); flex-shrink: 0; }
+    .rev-v { font-weight: 600; color: var(--text); text-align: right; }
+    .rev-item { padding: 8px 0; border-bottom: 1px solid var(--bg); }
+    .rev-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .rev-item-t { font-weight: 600; color: var(--text); font-size: 14px; }
+    .rev-item-s { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+    /* ── Sucesso ──────────────────────────────── */
+    .ok-screen { text-align: center; padding: 48px 24px; }
+    .ok-circle { width: 80px; height: 80px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; }
+    .ok-title { font-size: 26px; font-weight: 800; color: var(--text); margin-bottom: 10px; letter-spacing: -0.4px; }
+    .ok-desc { font-size: 15px; color: var(--muted); line-height: 1.65; margin-bottom: 28px; }
+    .ok-link { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--green-light); border: 1.5px solid var(--green); color: var(--green); border-radius: var(--radius); padding: 15px; font-size: 15px; font-weight: 700; text-decoration: none; margin-bottom: 10px; transition: background 0.15s; }
+    .ok-link:hover { background: #d0edda; }
+    .new-btn { width: 100%; background: none; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 15px; color: var(--muted); cursor: pointer; font-family: inherit; font-weight: 600; transition: background 0.15s; }
+    .new-btn:hover { background: var(--bg); }
+
+    /* ── Error ───────────────────────────────── */
+    .err { background: var(--red-light); border: 1.5px solid #fecaca; color: var(--red); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; margin-bottom: 12px; font-weight: 500; }
+
+    /* ── Spinner ─────────────────────────────── */
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Dark mode ───────────────────────────── */
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111827; --white: #1f2937; --text: #f9fafb; --muted: #9ca3af; --border: #374151; --green-light: #052e16; --green-pale: #041f10; --shadow: 0 1px 3px rgba(0,0,0,0.3); }
+      input, textarea, select { background: #111827; color: #f9fafb; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+/* =====================================================
+   ⚙️  CONFIGURAÇÃO — cole a URL do App Script abaixo
+   ===================================================== */
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT7ZNgVeFPAsLufZMyzPvloarQngJCKkMzE7QOlxxO7ZlUU2f_DOH081IfR2bLyJkf/exec";
+
+/* ─────────────────────────────────────────────────── */
+
+const STEPS = [
+  { id: "reuniao",       label: "Reunião"      },
+  { id: "participantes", label: "Pessoas"       },
+  { id: "assuntos",      label: "Assuntos"      },
+  { id: "acoes",         label: "Ações"         },
+  { id: "revisar",       label: "Revisar"       },
+];
+
+function App() {
+  const [step, setStep]       = React.useState(0);
+  const [enviando, setEnv]    = React.useState(false);
+  const [enviado, setEnviado] = React.useState(false);
+  const [linkPDF, setLink]    = React.useState("");
+  const [erro, setErro]       = React.useState("");
+
+  const [form, setForm] = React.useState({
+    tipo: "", data: hoje(), hora: horaAgora(), local: "",
+    participantes: [{ nome: "", telefone: "" }],
+    topicos:       [""],
+    acoes:         [{ descricao: "", responsavel: "", prazo: "" }],
+  });
+
+  function upd(campo, valor) {
+    setForm(f => ({ ...f, [campo]: valor }));
+  }
+
+  const progresso = (step / (STEPS.length - 1)) * 100;
+
+  async function enviar() {
+    setEnv(true); setErro("");
+    try {
+      const acoesFull = form.acoes.map(a => {
+        const p = form.participantes[parseInt(a.responsavel)];
+        return { ...a, responsavelNome: p?.nome || "", responsavelTelefone: p?.telefone || "" };
+      });
+      const payload = {
+        ...form,
+        acoes:   acoesFull.filter(a => a.descricao.trim()),
+        topicos: form.topicos.filter(t => t.trim()),
+      };
+      const r    = await fetch(APP_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await r.json();
+      if (json.status === "ok") { setLink(json.info || ""); setEnviado(true); }
+      else throw new Error(json.mensagem || "Erro desconhecido");
+    } catch (e) {
+      setErro("Não foi possível enviar. Verifique sua conexão e tente novamente.");
+    }
+    setEnv(false);
+  }
+
+  function resetar() {
+    setForm({ tipo: "", data: hoje(), hora: horaAgora(), local: "", participantes: [{ nome: "", telefone: "" }], topicos: [""], acoes: [{ descricao: "", responsavel: "", prazo: "" }] });
+    setEnviado(false); setLink(""); setErro(""); setStep(0);
+  }
+
+  if (enviado) {
+    return (
+      <div>
+        <Header />
+        <div className="content ok-screen">
+          <div className="ok-circle">✅</div>
+          <div className="ok-title">Ata registrada!</div>
+          <div className="ok-desc">
+            A ata foi salva no Google Drive e enviada no WhatsApp
+            para todos os {form.participantes.length} participantes.<br/>
+            {form.acoes.filter(a=>a.descricao.trim()).length} ação(ões) registradas para acompanhamento.
+          </div>
+          {linkPDF && (
+            <a className="ok-link" href={linkPDF} target="_blank" rel="noopener">
+              📄 Abrir ata em PDF
+            </a>
+          )}
+          <button className="new-btn" onClick={resetar}>+ Registrar nova reunião</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <Header />
+      <div className="progress-track"><div className="progress-fill" style={{ width: progresso + "%" }} /></div>
+
+      <div className="steps-row">
+        {STEPS.map((s, i) => (
+          <div key={i} className={`step-item${i < step ? " clickable" : ""}`} onClick={() => i < step && setStep(i)}>
+            <div className={`step-bubble${i < step ? " done" : i === step ? " active" : ""}`}>
+              {i < step ? "✓" : i + 1}
+            </div>
+            <div className={`step-name${i === step ? " active" : ""}`}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="content">
+        {step === 0 && <StepReuniao       form={form} upd={upd} />}
+        {step === 1 && <StepParticipantes form={form} upd={upd} />}
+        {step === 2 && <StepAssuntos      form={form} upd={upd} />}
+        {step === 3 && <StepAcoes         form={form} upd={upd} />}
+        {step === 4 && <StepRevisar       form={form} />}
+
+        {erro && <div className="err">{erro}</div>}
+
+        <div className="nav">
+          {step > 0 && (
+            <button className="btn-back" onClick={() => setStep(s => s - 1)}>← Voltar</button>
+          )}
+          {step < STEPS.length - 1 ? (
+            <button className="btn-next" onClick={() => setStep(s => s + 1)}>
+              Continuar →
+            </button>
+          ) : (
+            <button className="btn-next" onClick={enviar} disabled={enviando}>
+              {enviando ? <><span className="spinner" />Enviando...</> : "✓ Finalizar e enviar ata"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Header() {
+  return (
+    <div className="hdr">
+      <div className="hdr-icon">🌿</div>
+      <div>
+        <div className="hdr-title">Atas de Reunião</div>
+        <div className="hdr-sub">Orgânico do Chico</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── ETAPA 1 — Dados da reunião ─────────────────── */
+function StepReuniao({ form, upd }) {
+  return (
+    <div>
+      <div className="step-heading">Sobre a reunião</div>
+      <div className="step-hint">Preencha as informações básicas desta reunião.</div>
+
+      <div className="field">
+        <label className="lbl">Tipo de reunião</label>
+        <input type="text" placeholder="Ex: Semanal operacional, Diretoria, Compras…" value={form.tipo} onChange={e => upd("tipo", e.target.value)} />
+      </div>
+
+      <div className="two-col">
+        <div className="field">
+          <label className="lbl">Data</label>
+          <input type="date" value={form.data} onChange={e => upd("data", e.target.value)} />
+        </div>
+        <div className="field">
+          <label className="lbl">Hora</label>
+          <input type="time" value={form.hora} onChange={e => upd("hora", e.target.value)} />
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="lbl">Local ou link</label>
+        <input type="text" placeholder="Ex: Sala de reuniões, Meet, Teams…" value={form.local} onChange={e => upd("local", e.target.value)} />
+      </div>
+    </div>
+  );
+}
+
+/* ── ETAPA 2 — Participantes ─────────────────────── */
+function StepParticipantes({ form, upd }) {
+  const ps = form.participantes;
+  function add()       { upd("participantes", [...ps, { nome: "", telefone: "" }]); }
+  function remove(i)   { upd("participantes", ps.filter((_, j) => j !== i)); }
+  function edit(i,k,v) { const n=[...ps]; n[i]={...n[i],[k]:v}; upd("participantes",n); }
+
+  return (
+    <div>
+      <div className="step-heading">Participantes</div>
+      <div className="step-hint">Quem participou desta reunião? Informe o WhatsApp para receber a ata automaticamente.</div>
+
+      {ps.map((p, i) => (
+        <div className="card" key={i}>
+          <div className="card-badge">Participante {i + 1}</div>
+          {ps.length > 1 && <button className="rm-btn" onClick={() => remove(i)}>×</button>}
+          <div className="card-body">
+            <div className="field">
+              <label className="lbl">Nome completo</label>
+              <input type="text" placeholder="Ex: João Silva" value={p.nome} onChange={e => edit(i, "nome", e.target.value)} />
+            </div>
+            <div className="field">
+              <label className="lbl">WhatsApp</label>
+              <input type="tel" placeholder="Ex: 31 99999-0000" value={p.telefone} onChange={e => edit(i, "telefone", e.target.value)} />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button className="add-btn" onClick={add}>+ Adicionar participante</button>
+    </div>
+  );
+}
+
+/* ── ETAPA 3 — Assuntos discutidos ───────────────── */
+function StepAssuntos({ form, upd }) {
+  const ts = form.topicos;
+  function add()       { upd("topicos", [...ts, ""]); }
+  function remove(i)   { upd("topicos", ts.filter((_, j) => j !== i)); }
+  function edit(i, v)  { const n=[...ts]; n[i]=v; upd("topicos",n); }
+
+  return (
+    <div>
+      <div className="step-heading">Assuntos discutidos</div>
+      <div className="step-hint">Registre tudo o que foi abordado nesta reunião.</div>
+
+      {ts.map((t, i) => (
+        <div className="card" key={i}>
+          <div className="card-badge">Assunto {i + 1}</div>
+          {ts.length > 1 && <button className="rm-btn" onClick={() => remove(i)}>×</button>}
+          <div className="card-body">
+            <textarea
+              placeholder="Descreva o que foi discutido…"
+              value={t}
+              onChange={e => edit(i, e.target.value)}
+            />
+          </div>
+        </div>
+      ))}
+      <button className="add-btn" onClick={add}>+ Adicionar assunto</button>
+    </div>
+  );
+}
+
+/* ── ETAPA 4 — Ações ─────────────────────────────── */
+function StepAcoes({ form, upd }) {
+  const as = form.acoes;
+  function add()       { upd("acoes", [...as, { descricao: "", responsavel: "", prazo: "" }]); }
+  function remove(i)   { upd("acoes", as.filter((_, j) => j !== i)); }
+  function edit(i,k,v) { const n=[...as]; n[i]={...n[i],[k]:v}; upd("acoes",n); }
+
+  return (
+    <div>
+      <div className="step-heading">Ações definidas</div>
+      <div className="step-hint">O que ficou acordado fazer? Defina o responsável e o prazo de cada ação.</div>
+
+      {as.map((a, i) => (
+        <div className="card" key={i}>
+          <div className="card-badge">Ação {i + 1}</div>
+          {as.length > 1 && <button className="rm-btn" onClick={() => remove(i)}>×</button>}
+          <div className="card-body">
+            <div className="field">
+              <label className="lbl">O que precisa ser feito?</label>
+              <textarea
+                placeholder="Descreva a ação de forma clara…"
+                value={a.descricao}
+                onChange={e => edit(i, "descricao", e.target.value)}
+                style={{ minHeight: 70 }}
+              />
+            </div>
+            <div className="field">
+              <label className="lbl">Responsável</label>
+              <select value={a.responsavel} onChange={e => edit(i, "responsavel", e.target.value)}>
+                <option value="">Selecionar participante…</option>
+                {form.participantes.map((p, j) => (
+                  <option key={j} value={j}>{p.nome || `Participante ${j + 1}`}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label className="lbl">Prazo</label>
+              <input type="date" value={a.prazo} onChange={e => edit(i, "prazo", e.target.value)} />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button className="add-btn" onClick={add}>+ Adicionar ação</button>
+    </div>
+  );
+}
+
+/* ── ETAPA 5 — Revisar ───────────────────────────── */
+function StepRevisar({ form }) {
+  const d = s => s ? new Date(s + "T12:00:00").toLocaleDateString("pt-BR") : "—";
+
+  return (
+    <div>
+      <div className="step-heading">Revisar e enviar</div>
+      <div className="step-hint">Confira os dados. Ao enviar, todos recebem a ata pelo WhatsApp e ela é salva no Google Drive.</div>
+
+      <div className="rev-card">
+        <div className="rev-section-label">Reunião</div>
+        <div className="rev-row"><span className="rev-k">Tipo</span><span className="rev-v">{form.tipo || "—"}</span></div>
+        <div className="rev-row"><span className="rev-k">Data e hora</span><span className="rev-v">{d(form.data)} às {form.hora}</span></div>
+        <div className="rev-row"><span className="rev-k">Local</span><span className="rev-v">{form.local || "—"}</span></div>
+      </div>
+
+      <div className="rev-card">
+        <div className="rev-section-label">Participantes ({form.participantes.length})</div>
+        {form.participantes.map((p, i) => (
+          <div className="rev-item" key={i}>
+            <div className="rev-item-t">{p.nome || "(sem nome)"}</div>
+            <div className="rev-item-s">📱 {p.telefone || "Sem WhatsApp"}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="rev-card">
+        <div className="rev-section-label">Assuntos ({form.topicos.filter(t=>t.trim()).length})</div>
+        {form.topicos.filter(t=>t.trim()).map((t, i) => (
+          <div className="rev-item" key={i}>
+            <div className="rev-item-t">{i + 1}. {t}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="rev-card">
+        <div className="rev-section-label">Ações ({form.acoes.filter(a=>a.descricao.trim()).length})</div>
+        {form.acoes.filter(a=>a.descricao.trim()).map((a, i) => {
+          const p = form.participantes[parseInt(a.responsavel)];
+          return (
+            <div className="rev-item" key={i}>
+              <div className="rev-item-t">{a.descricao}</div>
+              <div className="rev-item-s">👤 {p?.nome || "Sem responsável"}  ·  📅 {d(a.prazo)}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── Utilitários ─────────────────────────────────── */
+function hoje()     { return new Date().toISOString().split("T")[0]; }
+function horaAgora(){ return new Date().toTimeString().slice(0, 5); }
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

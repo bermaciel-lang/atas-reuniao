@@ -1,0 +1,24 @@
+{
+  "name": "Atas de Reunião — Orgânico do Chico",
+  "short_name": "Atas",
+  "description": "Sistema de registro e acompanhamento de atas de reunião",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#1a5c35",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
