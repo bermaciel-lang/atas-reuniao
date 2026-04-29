@@ -15,7 +15,8 @@
     :root {
       --green:#1a5c35;--green-mid:#2d7a4a;--green-lite:#e8f5ee;--green-pale:#f0faf4;
       --text:#111827;--muted:#6b7280;--border:#e5e7eb;--bg:#f3f4f6;--white:#fff;
-      --red:#dc2626;--red-lite:#fef2f2;--radius:14px;--radius-sm:9px;
+      --red:#dc2626;--red-lite:#fef2f2;--amber:#b45309;--amber-lite:#fef3c7;
+      --radius:14px;--radius-sm:9px;
       --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
     }
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -26,7 +27,7 @@
     .hdr-icon{width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
     .hdr-title{color:#fff;font-size:16px;font-weight:700;line-height:1.2}
     .hdr-sub{color:rgba(255,255,255,.65);font-size:12px}
-    .dash-link{color:rgba(255,255,255,.8);font-size:12px;text-decoration:none;border:1px solid rgba(255,255,255,.3);padding:5px 10px;border-radius:8px}
+    .dash-link{color:rgba(255,255,255,.8);font-size:12px;text-decoration:none;border:1px solid rgba(255,255,255,.3);padding:5px 10px;border-radius:8px;white-space:nowrap}
     .progress-track{height:3px;background:rgba(255,255,255,.2)}
     .progress-fill{height:100%;background:#fff;transition:width .35s cubic-bezier(.4,0,.2,1)}
     .steps-row{background:var(--white);border-bottom:1px solid var(--border);padding:10px 16px;display:flex}
@@ -48,17 +49,27 @@
       font-size:16px;font-family:inherit;background:var(--white);color:var(--text);
       outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none}
     input:focus,textarea:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(26,92,53,.12)}
-    textarea{resize:vertical;min-height:84px;line-height:1.55}
-    .two-col{display:flex;gap:10px}
-    .two-col>.field{flex:1}
-    .card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;position:relative;box-shadow:var(--shadow)}
+    textarea{resize:vertical;min-height:80px;line-height:1.55}
+
+    /* Cards */
+    .card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;position:relative;box-shadow:var(--shadow)}
     .card-badge{position:absolute;top:-1px;left:14px;background:var(--green);color:#fff;font-size:10px;font-weight:800;padding:2px 9px;border-radius:0 0 7px 7px;text-transform:uppercase;letter-spacing:.05em}
-    .card-body{margin-top:16px}
+    .card-body{margin-top:18px}
     .rm-btn{position:absolute;top:8px;right:10px;width:28px;height:28px;border-radius:50%;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
     .rm-btn:hover{background:var(--red-lite);color:var(--red)}
+
+    /* Ações dentro de pauta */
+    .acao-sub{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-top:10px;position:relative}
+    .acao-sub-badge{display:inline-block;font-size:10px;font-weight:800;color:var(--amber);background:var(--amber-lite);padding:2px 8px;border-radius:4px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+    .acao-rm{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+    .acao-rm:hover{background:var(--red-lite);color:var(--red)}
+    .add-acao-btn{width:100%;margin-top:10px;background:none;border:1.5px dashed #d1d5db;border-radius:var(--radius-sm);padding:9px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
+    .add-acao-btn:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-lite)}
+
     .add-btn{width:100%;background:none;border:2px dashed var(--border);border-radius:var(--radius);padding:13px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;margin-top:2px}
     .add-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-pale)}
-    /* Checkbox participantes */
+
+    /* Participantes checkboxes */
     .part-check{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:border-color .15s}
     .part-check.selected{border-color:var(--green);background:var(--green-lite)}
     .part-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);flex-shrink:0;cursor:pointer}
@@ -67,6 +78,8 @@
     .part-check-tel{font-size:12px;color:var(--muted)}
     .divider{border:none;border-top:1px dashed var(--border);margin:14px 0}
     .carregando-txt{font-size:14px;color:var(--muted);text-align:center;padding:16px}
+
+    /* Nav */
     .nav{display:flex;gap:10px;margin-top:24px;padding-bottom:36px}
     .btn-back{flex:0 0 80px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius);background:none;font-size:15px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit}
     .btn-back:hover{background:var(--bg)}
@@ -74,28 +87,37 @@
     .btn-next:hover:not(:disabled){background:var(--green-mid)}
     .btn-next:active:not(:disabled){transform:scale(.98)}
     .btn-next:disabled{background:#9ca3af;cursor:not-allowed}
+
+    /* Revisão */
     .rev-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
     .rev-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:10px}
     .rev-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg);font-size:14px}
     .rev-row:last-child{border-bottom:none;padding-bottom:0}
     .rev-k{color:var(--muted)}
     .rev-v{font-weight:600;color:var(--text);text-align:right}
-    .rev-item{padding:8px 0;border-bottom:1px solid var(--bg)}
-    .rev-item:last-child{border-bottom:none;padding-bottom:0}
-    .rev-item-t{font-weight:600;color:var(--text);font-size:14px}
-    .rev-item-s{color:var(--muted);font-size:12px;margin-top:3px}
+    .rev-pauta{padding:10px 0;border-bottom:1px solid var(--bg)}
+    .rev-pauta:last-child{border-bottom:none;padding-bottom:0}
+    .rev-pauta-titulo{font-weight:700;color:var(--text);font-size:14px;margin-bottom:4px}
+    .rev-pauta-disc{color:var(--muted);font-size:13px;margin-bottom:6px}
+    .rev-acao{font-size:12px;color:var(--text);padding:3px 0 3px 12px;border-left:2px solid var(--amber-lite)}
+    .rev-acao-sub{color:var(--muted);font-size:11px}
+
+    /* Sucesso */
     .ok-screen{text-align:center;padding:48px 24px}
     .ok-circle{width:80px;height:80px;border-radius:50%;background:var(--green-lite);display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 20px}
     .ok-title{font-size:26px;font-weight:800;color:var(--text);margin-bottom:10px}
     .ok-desc{font-size:15px;color:var(--muted);line-height:1.65;margin-bottom:28px}
     .ok-link{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--green-lite);border:1.5px solid var(--green);color:var(--green);border-radius:var(--radius);padding:15px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:10px}
     .new-btn{width:100%;background:none;border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;font-size:15px;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:600}
+
     .err{background:var(--red-lite);border:1.5px solid #fecaca;color:var(--red);border-radius:var(--radius-sm);padding:12px 14px;font-size:14px;margin-bottom:12px;font-weight:500}
     .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
     @keyframes spin{to{transform:rotate(360deg)}}
+
     @media(prefers-color-scheme:dark){
-      :root{--bg:#111827;--white:#1f2937;--text:#f9fafb;--muted:#9ca3af;--border:#374151;--green-lite:#052e16;--green-pale:#041f10}
+      :root{--bg:#111827;--white:#1f2937;--text:#f9fafb;--muted:#9ca3af;--border:#374151;--green-lite:#052e16;--green-pale:#041f10;--amber-lite:#2d1f00}
       input,textarea,select{background:#111827;color:#f9fafb}
+      .acao-sub{background:#111827}
     }
   </style>
 </head>
@@ -104,7 +126,10 @@
 <script type="text/babel">
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT7ZNgVeFPAsLufZMyzPvloarQngJCKkMzE7QOlxxO7ZlUU2f_DOH081IfR2bLyJkf/exec";
 const AREAS = ["Operação","Atendimento","Compras","Financeiro/Fiscal","Entregadores","Geral"];
-const STEPS = [{label:"Reunião"},{label:"Pessoas"},{label:"Assuntos"},{label:"Ações"},{label:"Revisar"}];
+const STEPS = [{label:"Reunião"},{label:"Pessoas"},{label:"Pautas"},{label:"Revisar"}];
+
+function novaAcao(){ return {descricao:"",responsavel:"",prazo:""}; }
+function novaPauta(){ return {titulo:"",discussao:"",acoes:[novaAcao()]}; }
 
 function App() {
   const [step, setStep]       = React.useState(0);
@@ -114,9 +139,9 @@ function App() {
   const [erro, setErro]       = React.useState("");
   const [form, setForm] = React.useState({
     area:"", data:hoje(),
+    introducao:"",
     participantes:[],
-    topicos:[""],
-    acoes:[{descricao:"",responsavel:"",prazo:""}],
+    pautas:[novaPauta()],
   });
 
   function upd(campo,valor){ setForm(f=>({...f,[campo]:valor})); }
@@ -125,16 +150,35 @@ function App() {
   async function enviar() {
     setEnv(true); setErro("");
     try {
-      const acoesFull = form.acoes.map(a=>{
-        const p = form.participantes[parseInt(a.responsavel)];
-        return {...a, responsavelNome:p?.nome||"", responsavelTelefone:p?.telefone||""};
-      });
+      // Transforma pautas no formato que o App Script espera
+      const pautasFull = form.pautas.map(p => ({
+        titulo:    p.titulo,
+        discussao: p.discussao,
+        acoes: p.acoes
+          .filter(a => a.descricao.trim())
+          .map(a => {
+            const part = form.participantes[parseInt(a.responsavel)];
+            return {
+              descricao:           a.descricao,
+              responsavel:         a.responsavel,
+              responsavelNome:     part?.nome     || "",
+              responsavelTelefone: part?.telefone || "",
+              prazo:               a.prazo,
+            };
+          }),
+      })).filter(p => p.titulo.trim() || p.discussao.trim());
+
       const payload = {
-        tipo: form.area, data: form.data,
+        tipo:          form.area,
+        data:          form.data,
+        introducao:    form.introducao,
         participantes: form.participantes,
-        topicos: form.topicos.filter(t=>t.trim()),
-        acoes: acoesFull.filter(a=>a.descricao.trim()),
+        pautas:        pautasFull,
+        // backwards compat flat arrays
+        topicos: pautasFull.map(p => p.titulo ? `${p.titulo}: ${p.discussao}` : p.discussao).filter(Boolean),
+        acoes:   pautasFull.flatMap(p => p.acoes),
       };
+
       const r = await fetch(APP_SCRIPT_URL,{method:"POST",body:JSON.stringify(payload)});
       const json = await r.json();
       if(json.status==="ok"){setLink(json.info||"");setEnviado(true);}
@@ -144,7 +188,7 @@ function App() {
   }
 
   function resetar(){
-    setForm({area:"",data:hoje(),participantes:[],topicos:[""],acoes:[{descricao:"",responsavel:"",prazo:""}]});
+    setForm({area:"",data:hoje(),introducao:"",participantes:[],pautas:[novaPauta()]});
     setEnviado(false);setLink("");setErro("");setStep(0);
   }
 
@@ -156,7 +200,7 @@ function App() {
         <div className="ok-title">Ata registrada!</div>
         <div className="ok-desc">
           A ata foi salva no Google Drive e enviada no WhatsApp para todos os participantes.<br/>
-          {form.acoes.filter(a=>a.descricao.trim()).length} ação(ões) registradas para acompanhamento.
+          {form.pautas.flatMap(p=>p.acoes).filter(a=>a.descricao?.trim()).length} ação(ões) registradas.
         </div>
         {linkPDF && <a className="ok-link" href={linkPDF} target="_blank" rel="noopener">📄 Abrir ata em PDF</a>}
         <button className="new-btn" onClick={resetar}>+ Registrar nova reunião</button>
@@ -179,9 +223,8 @@ function App() {
       <div className="content">
         {step===0 && <StepReuniao form={form} upd={upd}/>}
         {step===1 && <StepParticipantes form={form} upd={upd}/>}
-        {step===2 && <StepAssuntos form={form} upd={upd}/>}
-        {step===3 && <StepAcoes form={form} upd={upd}/>}
-        {step===4 && <StepRevisar form={form}/>}
+        {step===2 && <StepPautas form={form} upd={upd}/>}
+        {step===3 && <StepRevisar form={form}/>}
         {erro && <div className="err">{erro}</div>}
         <div className="nav">
           {step>0 && <button className="btn-back" onClick={()=>setStep(s=>s-1)}>← Voltar</button>}
@@ -208,11 +251,12 @@ function Header(){
   );
 }
 
+/* ── ETAPA 1: Reunião ─────────────────────────── */
 function StepReuniao({form,upd}){
   return (
     <div>
       <div className="step-heading">Sobre a reunião</div>
-      <div className="step-hint">Selecione a área e a data desta reunião.</div>
+      <div className="step-hint">Selecione a área, data e escreva uma breve introdução com as pautas previstas.</div>
       <div className="field">
         <label className="lbl">Área</label>
         <select value={form.area} onChange={e=>upd("area",e.target.value)}>
@@ -224,89 +268,80 @@ function StepReuniao({form,upd}){
         <label className="lbl">Data</label>
         <input type="date" value={form.data} onChange={e=>upd("data",e.target.value)}/>
       </div>
+      <div className="field">
+        <label className="lbl">Introdução e pautas previstas</label>
+        <textarea
+          placeholder="Ex: Reunião semanal de operação. Pautas: 1) Revisão de metas da semana 2) Novos fornecedores 3) Escala de entregas"
+          value={form.introducao}
+          onChange={e=>upd("introducao",e.target.value)}
+          style={{minHeight:100}}
+        />
+      </div>
     </div>
   );
 }
 
+/* ── ETAPA 2: Participantes ───────────────────── */
 function StepParticipantes({form,upd}){
   const [carregando, setCarregando] = React.useState(false);
   const [extras, setExtras]         = React.useState([]);
   const [fixos, setFixos]           = React.useState([]);
   const carregouRef                 = React.useRef(false);
 
-  // Carrega TODOS os participantes uma única vez
   React.useEffect(()=>{
     if(carregouRef.current) return;
     carregouRef.current = true;
     setCarregando(true);
     fetch(`${APP_SCRIPT_URL}?action=todos_participantes`)
       .then(r=>r.json())
-      .then(lista=>{ setFixos(lista.map(p=>({...p, selecionado:false}))); upd("participantes",[]); })
+      .then(lista=>{ setFixos(lista.map(p=>({...p,selecionado:false}))); upd("participantes",[]); })
       .catch(()=>{ setFixos([]); })
       .finally(()=>setCarregando(false));
   },[]);
 
-  // Quando a área muda, pré-marca os participantes obrigatórios
   React.useEffect(()=>{
-    if(!form.area || !fixos.length) return;
+    if(!form.area||!fixos.length) return;
     fetch(`${APP_SCRIPT_URL}?action=padrao_area&area=${encodeURIComponent(form.area)}`)
       .then(r=>r.json())
       .then(nomes=>{
-        const nomesSet = new Set(nomes.map(n=>n.trim()));
-        const atualizados = fixos.map(p=>({...p, selecionado: nomesSet.has(p.nome)}));
-        setFixos(atualizados);
-        setExtras([]);
-        sincronizar(atualizados,[]);
-      })
-      .catch(()=>{});
+        const s = new Set(nomes.map(n=>n.trim()));
+        const upd2 = fixos.map(p=>({...p,selecionado:s.has(p.nome)}));
+        setFixos(upd2); setExtras([]); sincronizar(upd2,[]);
+      }).catch(()=>{});
   },[form.area]);
 
-  function toggleFixo(i){
-    const n=[...fixos]; n[i]={...n[i],selecionado:!n[i].selecionado};
-    setFixos(n); sincronizar(n,extras);
-  }
-
+  function toggleFixo(i){ const n=[...fixos]; n[i]={...n[i],selecionado:!n[i].selecionado}; setFixos(n); sincronizar(n,extras); }
   function addExtra(){ setExtras(e=>[...e,{nome:"",telefone:"",email:"",selecionado:true}]); }
   function removeExtra(i){ const n=extras.filter((_,j)=>j!==i); setExtras(n); sincronizar(fixos,n); }
   function editExtra(i,k,v){ const n=[...extras]; n[i]={...n[i],[k]:v}; setExtras(n); sincronizar(fixos,n); }
-
   function sincronizar(f,e){
-    const selecionados = [
+    upd("participantes",[
       ...f.filter(p=>p.selecionado).map(({nome,telefone,email})=>({nome,telefone,email})),
       ...e.filter(p=>p.nome.trim()).map(({nome,telefone,email})=>({nome,telefone,email})),
-    ];
-    upd("participantes",selecionados);
+    ]);
   }
-
-  const qtdSelecionados = fixos.filter(p=>p.selecionado).length + extras.filter(p=>p.nome.trim()).length;
+  const qtd = fixos.filter(p=>p.selecionado).length + extras.filter(p=>p.nome.trim()).length;
 
   return (
     <div>
       <div className="step-heading">Participantes</div>
       <div className="step-hint">
-        Os participantes obrigatórios já estão marcados. Desmarque quem não veio ou adicione alguém extra.
-        {qtdSelecionados > 0 && <strong style={{color:"var(--green)"}}> {qtdSelecionados} selecionado(s).</strong>}
+        Os obrigatórios já estão marcados. Desmarque quem não veio ou adicione alguém extra.
+        {qtd>0&&<strong style={{color:"var(--green)"}}> {qtd} selecionado(s).</strong>}
       </div>
-
-      {carregando && <div className="carregando-txt">Carregando participantes…</div>}
-
-      {!carregando && fixos.length === 0 && (
-        <div className="carregando-txt">Nenhum participante cadastrado na planilha ainda.</div>
-      )}
-
-      {!carregando && fixos.map((p,i)=>(
+      {carregando&&<div className="carregando-txt">Carregando…</div>}
+      {!carregando&&fixos.length===0&&<div className="carregando-txt">Nenhum participante cadastrado na planilha ainda.</div>}
+      {!carregando&&fixos.map((p,i)=>(
         <label key={i} className={`part-check${p.selecionado?" selected":""}`} onClick={()=>toggleFixo(i)}>
           <input type="checkbox" checked={p.selecionado} onChange={()=>toggleFixo(i)}/>
           <div className="part-check-info">
             <div className="part-check-nome">{p.nome}</div>
-            {p.telefone && <div className="part-check-tel">📱 {p.telefone}</div>}
+            {p.telefone&&<div className="part-check-tel">📱 {p.telefone}</div>}
           </div>
         </label>
       ))}
-
       <hr className="divider"/>
       <div className="lbl" style={{marginBottom:8}}>Adicionar participante extra</div>
-
       {extras.map((p,i)=>(
         <div className="card" key={i}>
           <div className="card-badge">Extra {i+1}</div>
@@ -323,103 +358,119 @@ function StepParticipantes({form,upd}){
   );
 }
 
-function StepAssuntos({form,upd}){
-  const ts=form.topicos;
-  function add(){upd("topicos",[...ts,""]);}
-  function remove(i){upd("topicos",ts.filter((_,j)=>j!==i));}
-  function edit(i,v){const n=[...ts];n[i]=v;upd("topicos",n);}
+/* ── ETAPA 3: Pautas ──────────────────────────── */
+function StepPautas({form,upd}){
+  const ps = form.pautas;
+
+  function updPautas(novas){ upd("pautas",novas); }
+  function addPauta(){ updPautas([...ps, novaPauta()]); }
+  function removePauta(i){ updPautas(ps.filter((_,j)=>j!==i)); }
+
+  function editPauta(i,k,v){
+    const n=[...ps]; n[i]={...n[i],[k]:v}; updPautas(n);
+  }
+  function addAcao(pi){
+    const n=[...ps]; n[pi]={...n[pi],acoes:[...n[pi].acoes,novaAcao()]}; updPautas(n);
+  }
+  function removeAcao(pi,ai){
+    const n=[...ps]; n[pi]={...n[pi],acoes:n[pi].acoes.filter((_,j)=>j!==ai)}; updPautas(n);
+  }
+  function editAcao(pi,ai,k,v){
+    const n=[...ps]; n[pi].acoes[ai]={...n[pi].acoes[ai],[k]:v}; updPautas(n);
+  }
+
   return (
     <div>
-      <div className="step-heading">Assuntos discutidos</div>
-      <div className="step-hint">Registre tudo o que foi abordado nesta reunião.</div>
-      {ts.map((t,i)=>(
-        <div className="card" key={i}>
-          <div className="card-badge">Assunto {i+1}</div>
-          {ts.length>1&&<button className="rm-btn" onClick={()=>remove(i)}>×</button>}
+      <div className="step-heading">Pautas discutidas</div>
+      <div className="step-hint">Para cada pauta: descreva o assunto, o que foi discutido, e adicione as ações definidas.</div>
+
+      {ps.map((p,pi)=>(
+        <div className="card" key={pi}>
+          <div className="card-badge">Pauta {pi+1}</div>
+          {ps.length>1&&<button className="rm-btn" onClick={()=>removePauta(pi)}>×</button>}
           <div className="card-body">
-            <textarea placeholder="Descreva o que foi discutido…" value={t} onChange={e=>edit(i,e.target.value)}/>
+            <div className="field">
+              <label className="lbl">Título da pauta</label>
+              <input type="text" placeholder="Ex: Revisão de metas da semana" value={p.titulo} onChange={e=>editPauta(pi,"titulo",e.target.value)}/>
+            </div>
+            <div className="field">
+              <label className="lbl">O que foi discutido</label>
+              <textarea placeholder="Descreva o que foi abordado, decisões tomadas…" value={p.discussao} onChange={e=>editPauta(pi,"discussao",e.target.value)}/>
+            </div>
+
+            <div className="lbl" style={{marginTop:4}}>Ações definidas nesta pauta</div>
+            {p.acoes.map((a,ai)=>(
+              <div className="acao-sub" key={ai}>
+                <div className="acao-sub-badge">Ação {ai+1}</div>
+                {p.acoes.length>1&&<button className="acao-rm" onClick={()=>removeAcao(pi,ai)}>×</button>}
+                <div className="field">
+                  <input type="text" placeholder="O que precisa ser feito?" value={a.descricao} onChange={e=>editAcao(pi,ai,"descricao",e.target.value)}/>
+                </div>
+                <div className="field">
+                  <select value={a.responsavel} onChange={e=>editAcao(pi,ai,"responsavel",e.target.value)}>
+                    <option value="">Responsável…</option>
+                    {form.participantes.map((pt,j)=><option key={j} value={j}>{pt.nome||`Participante ${j+1}`}</option>)}
+                  </select>
+                </div>
+                <div className="field" style={{marginBottom:0}}>
+                  <input type="date" value={a.prazo} onChange={e=>editAcao(pi,ai,"prazo",e.target.value)}/>
+                </div>
+              </div>
+            ))}
+            <button className="add-acao-btn" onClick={()=>addAcao(pi)}>+ Adicionar ação nesta pauta</button>
           </div>
         </div>
       ))}
-      <button className="add-btn" onClick={add}>+ Adicionar assunto</button>
+
+      <button className="add-btn" onClick={addPauta}>+ Adicionar pauta</button>
     </div>
   );
 }
 
-function StepAcoes({form,upd}){
-  const as=form.acoes;
-  function add(){upd("acoes",[...as,{descricao:"",responsavel:"",prazo:""}]);}
-  function remove(i){upd("acoes",as.filter((_,j)=>j!==i));}
-  function edit(i,k,v){const n=[...as];n[i]={...n[i],[k]:v};upd("acoes",n);}
-  return (
-    <div>
-      <div className="step-heading">Ações definidas</div>
-      <div className="step-hint">O que ficou acordado fazer? Defina o responsável e o prazo.</div>
-      {as.map((a,i)=>(
-        <div className="card" key={i}>
-          <div className="card-badge">Ação {i+1}</div>
-          {as.length>1&&<button className="rm-btn" onClick={()=>remove(i)}>×</button>}
-          <div className="card-body">
-            <div className="field">
-              <label className="lbl">O que precisa ser feito?</label>
-              <textarea placeholder="Descreva a ação…" value={a.descricao} onChange={e=>edit(i,"descricao",e.target.value)} style={{minHeight:70}}/>
-            </div>
-            <div className="field">
-              <label className="lbl">Responsável</label>
-              <select value={a.responsavel} onChange={e=>edit(i,"responsavel",e.target.value)}>
-                <option value="">Selecionar participante…</option>
-                {form.participantes.map((p,j)=><option key={j} value={j}>{p.nome||`Participante ${j+1}`}</option>)}
-              </select>
-            </div>
-            <div className="field">
-              <label className="lbl">Prazo</label>
-              <input type="date" value={a.prazo} onChange={e=>edit(i,"prazo",e.target.value)}/>
-            </div>
-          </div>
-        </div>
-      ))}
-      <button className="add-btn" onClick={add}>+ Adicionar ação</button>
-    </div>
-  );
-}
-
+/* ── ETAPA 4: Revisar ─────────────────────────── */
 function StepRevisar({form}){
   const d=s=>s?new Date(s+"T12:00:00").toLocaleDateString("pt-BR"):"—";
+  const totalAcoes = form.pautas.flatMap(p=>p.acoes).filter(a=>a.descricao?.trim()).length;
+
   return (
     <div>
       <div className="step-heading">Revisar e enviar</div>
       <div className="step-hint">Confira os dados. Ao enviar, todos recebem a ata no WhatsApp e ela é salva no Drive.</div>
+
       <div className="rev-card">
         <div className="rev-lbl">Reunião</div>
         <div className="rev-row"><span className="rev-k">Área</span><span className="rev-v">{form.area||"—"}</span></div>
         <div className="rev-row"><span className="rev-k">Data</span><span className="rev-v">{d(form.data)}</span></div>
+        {form.introducao&&<div className="rev-row"><span className="rev-k">Introdução</span><span className="rev-v" style={{maxWidth:"60%",textAlign:"right"}}>{form.introducao.substring(0,80)}{form.introducao.length>80?"…":""}</span></div>}
       </div>
+
       <div className="rev-card">
         <div className="rev-lbl">Participantes ({form.participantes.length})</div>
         {form.participantes.map((p,i)=>(
-          <div className="rev-item" key={i}>
-            <div className="rev-item-t">{p.nome||"(sem nome)"}</div>
-            <div className="rev-item-s">📱 {p.telefone||"Sem WhatsApp"}{p.email?` · ✉️ ${p.email}`:""}</div>
+          <div className="rev-pauta" key={i} style={{padding:"6px 0"}}>
+            <div style={{fontWeight:600,fontSize:14,color:"var(--text)"}}>{p.nome}</div>
+            <div style={{fontSize:12,color:"var(--muted)"}}>📱 {p.telefone||"Sem WhatsApp"}</div>
           </div>
         ))}
       </div>
+
       <div className="rev-card">
-        <div className="rev-lbl">Assuntos ({form.topicos.filter(t=>t.trim()).length})</div>
-        {form.topicos.filter(t=>t.trim()).map((t,i)=>(
-          <div className="rev-item" key={i}><div className="rev-item-t">{i+1}. {t}</div></div>
+        <div className="rev-lbl">Pautas ({form.pautas.filter(p=>p.titulo||p.discussao).length}) · {totalAcoes} ação(ões)</div>
+        {form.pautas.filter(p=>p.titulo.trim()||p.discussao.trim()).map((p,pi)=>(
+          <div className="rev-pauta" key={pi}>
+            <div className="rev-pauta-titulo">{pi+1}. {p.titulo||"(sem título)"}</div>
+            {p.discussao&&<div className="rev-pauta-disc">{p.discussao.substring(0,100)}{p.discussao.length>100?"…":""}</div>}
+            {p.acoes.filter(a=>a.descricao.trim()).map((a,ai)=>{
+              const pt = form.participantes[parseInt(a.responsavel)];
+              return (
+                <div className="rev-acao" key={ai}>
+                  <div>{a.descricao}</div>
+                  <div className="rev-acao-sub">👤 {pt?.nome||"Sem responsável"} · 📅 {d(a.prazo)}</div>
+                </div>
+              );
+            })}
+          </div>
         ))}
-      </div>
-      <div className="rev-card">
-        <div className="rev-lbl">Ações ({form.acoes.filter(a=>a.descricao.trim()).length})</div>
-        {form.acoes.filter(a=>a.descricao.trim()).map((a,i)=>{
-          const p=form.participantes[parseInt(a.responsavel)];
-          return (
-            <div className="rev-item" key={i}>
-              <div className="rev-item-t">{a.descricao}</div>
-              <div className="rev-item-s">👤 {p?.nome||"Sem responsável"} · 📅 {d(a.prazo)}</div>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
