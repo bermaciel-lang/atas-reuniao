@@ -9,104 +9,110 @@
   <meta name="apple-mobile-web-app-title" content="Dashboard Atas">
   <style>
     :root {
-      --green:      #1a5c35;
-      --green-mid:  #2d7a4a;
-      --green-lite: #e8f5ee;
-      --green-pale: #f0faf4;
-      --text:       #111827;
-      --muted:      #6b7280;
-      --border:     #e5e7eb;
-      --bg:         #f3f4f6;
-      --white:      #ffffff;
-      --radius:     14px;
-      --radius-sm:  9px;
+      --green:#1a5c35;--green-mid:#2d7a4a;--green-lite:#e8f5ee;--green-pale:#f0faf4;
+      --text:#111827;--muted:#6b7280;--border:#e5e7eb;--bg:#f3f4f6;--white:#fff;
+      --red:#dc2626;--red-lite:#fef2f2;--orange:#d97706;--orange-lite:#fef3c7;
+      --radius:14px;--radius-sm:9px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh}
 
-    /* Header */
-    .hdr { background: var(--green); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
-    .hdr-left { display: flex; align-items: center; gap: 12px; }
-    .hdr-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    .hdr-title { color: #fff; font-size: 17px; font-weight: 700; }
-    .hdr-sub { color: rgba(255,255,255,0.65); font-size: 12px; }
-    .nova-ata-btn { background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.4); color: #fff; border-radius: var(--radius-sm); padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit; }
-    .nova-ata-btn:hover { background: rgba(255,255,255,0.25); }
+    .hdr{background:var(--green);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+    .hdr-left{display:flex;align-items:center;gap:12px}
+    .hdr-icon{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .hdr-title{color:#fff;font-size:17px;font-weight:700}
+    .hdr-sub{color:rgba(255,255,255,.65);font-size:12px}
+    .nova-ata-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+    .nova-ata-btn:hover{background:rgba(255,255,255,.25)}
 
-    /* Content */
-    .page { max-width: 900px; margin: 0 auto; padding: 20px 16px 40px; }
-    .mes-titulo { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; }
+    /* Tabs */
+    .tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;padding:0 16px;overflow-x:auto}
+    .tab{padding:12px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s}
+    .tab.active{color:var(--green);border-bottom-color:var(--green)}
 
-    /* Summary cards */
-    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
-    .stat { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
-    .stat-num { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 4px; }
-    .stat-num.verde { color: #1a5c35; }
-    .stat-num.laranja { color: #b45309; }
-    .stat-num.vermelho { color: #dc2626; }
-    .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+    /* Filter */
+    .filter-bar{padding:14px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:900px;margin:0 auto;width:100%}
+    .filter-bar select{padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;font-family:inherit;background:var(--white);color:var(--text);outline:none}
+    .filter-bar select:focus{border-color:var(--green)}
+    .filter-label{font-size:13px;color:var(--muted);font-weight:500}
 
-    /* Area cards */
-    .section-title { font-size: 16px; font-weight: 700; color: var(--text); margin: 24px 0 12px; }
+    .page{max-width:900px;margin:0 auto;padding:0 16px 40px;width:100%}
+    .mes-titulo{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px;padding-top:16px}
 
-    .area-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
-    .area-card.em_dia   { border-left: 4px solid #1a5c35; }
-    .area-card.parcial  { border-left: 4px solid #d97706; }
-    .area-card.atrasada { border-left: 4px solid #dc2626; }
-    .area-card.sem_periodicidade { border-left: 4px solid #d1d5db; }
+    .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+    .stat{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+    .stat-num{font-size:28px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
+    .stat-num.verde{color:#1a5c35}
+    .stat-num.laranja{color:var(--orange)}
+    .stat-num.vermelho{color:var(--red)}
+    .stat-label{font-size:12px;color:var(--muted);font-weight:500}
 
-    .area-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; }
-    .area-header:hover { background: var(--bg); }
-    .area-left { display: flex; align-items: center; gap: 10px; }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .dot-verde   { background: #1a5c35; }
-    .dot-parcial { background: #d97706; }
-    .dot-vermelho{ background: #dc2626; }
-    .dot-cinza   { background: #d1d5db; }
-    .area-nome { font-size: 15px; font-weight: 700; color: var(--text); }
-    .area-freq { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .area-right { display: flex; align-items: center; gap: 12px; }
-    .progress-pill { display: flex; align-items: center; gap: 6px; }
-    .pill-bar { width: 80px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .pill-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-    .fill-verde   { background: #1a5c35; }
-    .fill-parcial { background: #d97706; }
-    .fill-vermelho{ background: #dc2626; }
-    .pill-text { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
-    .status-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
-    .badge-verde   { background: #dcfce7; color: #1a5c35; }
-    .badge-parcial { background: #fef3c7; color: #92400e; }
-    .badge-vermelho{ background: #fee2e2; color: #dc2626; }
-    .badge-cinza   { background: var(--bg); color: var(--muted); }
-    .chevron { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
-    .chevron.open { transform: rotate(180deg); }
+    .section-title{font-size:16px;font-weight:700;color:var(--text);margin:24px 0 12px}
 
-    /* Atas list inside card */
-    .atas-list { border-top: 1px solid var(--border); }
-    .ata-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--bg); gap: 12px; }
-    .ata-item:last-child { border-bottom: none; }
-    .ata-data { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
-    .ata-pessoas { font-size: 12px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .ata-acoes-badge { font-size: 11px; background: var(--green-lite); color: var(--green); border-radius: 20px; padding: 2px 8px; white-space: nowrap; font-weight: 600; }
-    .ver-pdf { font-size: 12px; color: var(--green); font-weight: 600; text-decoration: none; white-space: nowrap; border: 1px solid var(--green-lite); background: var(--green-lite); padding: 4px 10px; border-radius: var(--radius-sm); }
-    .ver-pdf:hover { background: #d0edda; }
-    .sem-reunioes { padding: 14px 16px; font-size: 13px; color: var(--muted); font-style: italic; }
+    .area-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+    .area-card.em_dia{border-left:4px solid #1a5c35}
+    .area-card.parcial{border-left:4px solid var(--orange)}
+    .area-card.atrasada{border-left:4px solid var(--red)}
+    .area-card.sem_periodicidade{border-left:4px solid #d1d5db}
+    .area-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer}
+    .area-header:hover{background:var(--bg)}
+    .area-left{display:flex;align-items:center;gap:10px}
+    .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .dot-verde{background:#1a5c35}.dot-parcial{background:var(--orange)}.dot-vermelho{background:var(--red)}.dot-cinza{background:#d1d5db}
+    .area-nome{font-size:15px;font-weight:700;color:var(--text)}
+    .area-freq{font-size:12px;color:var(--muted);margin-top:2px}
+    .area-right{display:flex;align-items:center;gap:12px}
+    .progress-pill{display:flex;align-items:center;gap:6px}
+    .pill-bar{width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+    .pill-fill{height:100%;border-radius:3px;transition:width .5s ease}
+    .fill-verde{background:#1a5c35}.fill-parcial{background:var(--orange)}.fill-vermelho{background:var(--red)}
+    .pill-text{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+    .status-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+    .badge-verde{background:#dcfce7;color:#1a5c35}
+    .badge-parcial{background:var(--orange-lite);color:#92400e}
+    .badge-vermelho{background:var(--red-lite);color:var(--red)}
+    .badge-cinza{background:var(--bg);color:var(--muted)}
+    .chevron{color:var(--muted);font-size:18px;transition:transform .2s}
+    .chevron.open{transform:rotate(180deg)}
 
-    /* Loading */
-    .loading { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 15px; }
-    .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .atas-list{border-top:1px solid var(--border)}
+    .ata-item{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--bg);gap:12px}
+    .ata-item:last-child{border-bottom:none}
+    .ata-data{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap}
+    .ata-pessoas{font-size:12px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .ata-acoes-badge{font-size:11px;background:var(--green-lite);color:var(--green);border-radius:20px;padding:2px 8px;white-space:nowrap;font-weight:600}
+    .ver-pdf{font-size:12px;color:var(--green);font-weight:600;text-decoration:none;white-space:nowrap;border:1px solid var(--green-lite);background:var(--green-lite);padding:4px 10px;border-radius:var(--radius-sm)}
+    .ver-pdf:hover{background:#d0edda}
+    .sem-reunioes{padding:14px 16px;font-size:13px;color:var(--muted);font-style:italic}
 
-    /* Responsive */
-    @media (max-width: 500px) {
-      .summary { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .stat-num { font-size: 22px; }
-      .pill-bar { width: 50px; }
-      .status-badge { display: none; }
+    /* Ações por responsável */
+    .resp-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+    .resp-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer}
+    .resp-header:hover{background:var(--bg)}
+    .resp-nome{font-size:15px;font-weight:700;color:var(--text)}
+    .resp-pills{display:flex;gap:6px;align-items:center}
+    .rpill{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+    .rpill-verde{background:#dcfce7;color:#1a5c35}
+    .rpill-orange{background:var(--orange-lite);color:#92400e}
+    .rpill-red{background:var(--red-lite);color:var(--red)}
+    .acoes-list{border-top:1px solid var(--border)}
+    .acao-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid var(--bg)}
+    .acao-item:last-child{border-bottom:none}
+    .acao-icone{font-size:14px;flex-shrink:0;margin-top:1px}
+    .acao-info{flex:1}
+    .acao-desc{font-size:13px;font-weight:500;color:var(--text)}
+    .acao-meta{font-size:11px;color:var(--muted);margin-top:3px}
+    .prazo-vencido{color:var(--red);font-weight:600}
+
+    .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:15px}
+    .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    @media(max-width:500px){
+      .summary{gap:8px}.stat-num{font-size:22px}.pill-bar{width:50px}.status-badge{display:none}
     }
-
-    @media (prefers-color-scheme: dark) {
-      :root { --bg: #111827; --white: #1f2937; --text: #f9fafb; --muted: #9ca3af; --border: #374151; --green-lite: #052e16; --green-pale: #041f10; }
+    @media(prefers-color-scheme:dark){
+      :root{--bg:#111827;--white:#1f2937;--text:#f9fafb;--muted:#9ca3af;--border:#374151;--green-lite:#052e16;--green-pale:#041f10;--orange-lite:#451a03;--red-lite:#450a0a}
     }
   </style>
 </head>
@@ -115,79 +121,123 @@
 <div class="hdr">
   <div class="hdr-left">
     <div class="hdr-icon">🌿</div>
-    <div>
-      <div class="hdr-title">Dashboard de Reuniões</div>
-      <div class="hdr-sub">Orgânico do Chico</div>
-    </div>
+    <div><div class="hdr-title">Dashboard de Reuniões</div><div class="hdr-sub">Orgânico do Chico</div></div>
   </div>
   <a class="nova-ata-btn" href="/index.html">+ Nova ata</a>
 </div>
 
-<div class="page">
-  <div id="conteudo">
-    <div class="loading">
-      <div class="spinner"></div><br>
-      Carregando dados...
-    </div>
+<div class="tabs">
+  <div class="tab active" onclick="mudarAba('reunioes',this)">📋 Reuniões</div>
+  <div class="tab" onclick="mudarAba('acoes',this)">✅ Ações</div>
+</div>
+
+<!-- PAINEL REUNIÕES -->
+<div id="painel-reunioes">
+  <div class="filter-bar">
+    <span class="filter-label">Período:</span>
+    <select id="sel-mes" onchange="carregarReunioes()"></select>
+  </div>
+  <div class="page" id="cont-reunioes">
+    <div class="loading"><div class="spinner"></div><br>Carregando...</div>
+  </div>
+</div>
+
+<!-- PAINEL AÇÕES -->
+<div id="painel-acoes" style="display:none">
+  <div class="filter-bar">
+    <span class="filter-label">Filtrar:</span>
+    <select id="sel-filtro-acao" onchange="renderAcoes()">
+      <option value="todos">Todas</option>
+      <option value="Pendente">Pendentes</option>
+      <option value="Concluída">Concluídas</option>
+      <option value="atrasada">Atrasadas</option>
+    </select>
+  </div>
+  <div class="page" id="cont-acoes">
+    <div class="loading"><div class="spinner"></div><br>Carregando...</div>
   </div>
 </div>
 
 <script>
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT7ZNgVeFPAsLufZMyzPvloarQngJCKkMzE7QOlxxO7ZlUU2f_DOH081IfR2bLyJkf/exec";
+const APP_SCRIPT_URL = "COLE_A_URL_DO_APP_SCRIPT_AQUI";
+
+let dadosReunioes = null;
+let dadosAcoes    = null;
+let abaAtual      = "reunioes";
 
 const STATUS_LABEL = {
-  em_dia:           { texto: "Em dia",       classe: "badge-verde",   dot: "dot-verde",    fill: "fill-verde",    borda: "em_dia"   },
-  parcial:          { texto: "Parcial",       classe: "badge-parcial", dot: "dot-parcial",  fill: "fill-parcial",  borda: "parcial"  },
-  atrasada:         { texto: "Atrasada",      classe: "badge-vermelho",dot: "dot-vermelho", fill: "fill-vermelho", borda: "atrasada" },
-  sem_periodicidade:{ texto: "Sob demanda",   classe: "badge-cinza",   dot: "dot-cinza",    fill: "",              borda: "sem_periodicidade" },
+  em_dia:            {texto:"Em dia",     cls:"badge-verde",   dot:"dot-verde",    fill:"fill-verde",    borda:"em_dia"},
+  parcial:           {texto:"Parcial",    cls:"badge-parcial", dot:"dot-parcial",  fill:"fill-parcial",  borda:"parcial"},
+  atrasada:          {texto:"Atrasada",   cls:"badge-vermelho",dot:"dot-vermelho", fill:"fill-vermelho", borda:"atrasada"},
+  sem_periodicidade: {texto:"Sob demanda",cls:"badge-cinza",   dot:"dot-cinza",    fill:"",              borda:"sem_periodicidade"},
 };
 
-function fmtData(str) {
-  if (!str) return "—";
-  return new Date(str + "T12:00:00").toLocaleDateString("pt-BR", { day:"2-digit", month:"short" });
-}
-
-async function carregar() {
-  try {
-    const r    = await fetch(`${APP_SCRIPT_URL}?action=dashboard`);
-    const data = await r.json();
-    renderizar(data);
-  } catch (e) {
-    document.getElementById("conteudo").innerHTML =
-      `<div class="loading" style="color:#dc2626">Erro ao carregar dados.<br><small>${e.message}</small></div>`;
+function popularMeses() {
+  const sel  = document.getElementById("sel-mes");
+  const hoje = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d   = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+    const val = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+    const txt = d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+    const opt = document.createElement("option");
+    opt.value = val; opt.textContent = txt;
+    if (i === 0) opt.selected = true;
+    sel.appendChild(opt);
   }
 }
 
-function renderizar(data) {
-  const { mes, areas, acoes } = data;
+function mudarAba(aba, el) {
+  abaAtual = aba;
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("painel-reunioes").style.display = aba==="reunioes" ? "" : "none";
+  document.getElementById("painel-acoes").style.display    = aba==="acoes"    ? "" : "none";
+  if (aba === "acoes" && !dadosAcoes) carregarAcoes();
+}
 
-  const totalRealizadas = areas.reduce((s, a) => s + a.realizadas, 0);
-  const totalEsperadas  = areas.reduce((s, a) => s + a.esperadas, 0);
+async function carregarReunioes() {
+  const mes = document.getElementById("sel-mes").value;
+  document.getElementById("cont-reunioes").innerHTML =
+    '<div class="loading"><div class="spinner"></div><br>Carregando...</div>';
+  try {
+    const r    = await fetch(`${APP_SCRIPT_URL}?action=dashboard&mes=${mes}`);
+    dadosReunioes = await r.json();
+    renderReunioes(dadosReunioes);
+  } catch(e) {
+    document.getElementById("cont-reunioes").innerHTML =
+      `<div class="loading" style="color:var(--red)">Erro ao carregar.<br><small>${e.message}</small></div>`;
+  }
+}
 
-  let html = `<div class="mes-titulo">${mes}</div>`;
+async function carregarAcoes() {
+  document.getElementById("cont-acoes").innerHTML =
+    '<div class="loading"><div class="spinner"></div><br>Carregando...</div>';
+  try {
+    const r   = await fetch(`${APP_SCRIPT_URL}?action=acoes_completas`);
+    dadosAcoes = await r.json();
+    renderAcoes();
+  } catch(e) {
+    document.getElementById("cont-acoes").innerHTML =
+      `<div class="loading" style="color:var(--red)">Erro ao carregar.<br><small>${e.message}</small></div>`;
+  }
+}
 
-  // Cards de resumo
-  html += `
+function renderReunioes(data) {
+  const {mes, areas, acoes} = data;
+  const totalR = areas.reduce((s,a)=>s+a.realizadas,0);
+  const totalE = areas.reduce((s,a)=>s+a.esperadas,0);
+
+  let html = `<div class="mes-titulo">${mes}</div>
     <div class="summary">
-      <div class="stat">
-        <div class="stat-num verde">${totalRealizadas}/${totalEsperadas}</div>
-        <div class="stat-label">Reuniões realizadas</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num ${acoes.atrasadas > 0 ? "vermelho" : "laranja"}">${acoes.pendentes}</div>
-        <div class="stat-label">Ações pendentes</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num ${acoes.atrasadas > 0 ? "vermelho" : "verde"}">${acoes.atrasadas}</div>
-        <div class="stat-label">Ações atrasadas</div>
-      </div>
-    </div>`;
-
-  html += `<div class="section-title">Áreas</div>`;
+      <div class="stat"><div class="stat-num verde">${totalR}/${totalE}</div><div class="stat-label">Reuniões realizadas</div></div>
+      <div class="stat"><div class="stat-num ${acoes.pendentes>0?"laranja":""}">${acoes.pendentes}</div><div class="stat-label">Ações pendentes</div></div>
+      <div class="stat"><div class="stat-num ${acoes.atrasadas>0?"vermelho":""}">${acoes.atrasadas}</div><div class="stat-label">Ações atrasadas</div></div>
+    </div>
+    <div class="section-title">Áreas</div>`;
 
   areas.forEach((area, idx) => {
-    const s    = STATUS_LABEL[area.status];
-    const pct  = area.esperadas > 0 ? Math.min(100, Math.round((area.realizadas / area.esperadas) * 100)) : 0;
+    const s   = STATUS_LABEL[area.status];
+    const pct = area.esperadas > 0 ? Math.min(100, Math.round((area.realizadas/area.esperadas)*100)) : 0;
     const freq = area.frequencia === "Sem reunião periódica" ? "Sob demanda" : area.frequencia;
 
     html += `
@@ -195,49 +245,130 @@ function renderizar(data) {
         <div class="area-header" onclick="toggleCard(${idx})">
           <div class="area-left">
             <div class="status-dot ${s.dot}"></div>
-            <div>
-              <div class="area-nome">${area.area}</div>
-              <div class="area-freq">${freq}</div>
-            </div>
+            <div><div class="area-nome">${area.area}</div><div class="area-freq">${freq}</div></div>
           </div>
           <div class="area-right">
-            ${area.esperadas > 0 ? `
+            ${area.esperadas>0?`
               <div class="progress-pill">
                 <div class="pill-bar"><div class="pill-fill ${s.fill}" style="width:${pct}%"></div></div>
                 <div class="pill-text">${area.realizadas}/${area.esperadas}</div>
-              </div>` : ""}
-            <span class="status-badge ${s.classe}">${s.texto}</span>
+              </div>`:""}
+            <span class="status-badge ${s.cls}">${s.texto}</span>
             <span class="chevron" id="chev-${idx}">▾</span>
           </div>
         </div>
         <div class="atas-list" id="list-${idx}" style="display:none">
-          ${area.atas.length === 0
-            ? `<div class="sem-reunioes">Nenhuma reunião registrada este mês.</div>`
-            : area.atas.map(a => `
+          ${area.atas.length===0
+            ? `<div class="sem-reunioes">Nenhuma reunião registrada neste período.</div>`
+            : area.atas.map(a=>`
                 <div class="ata-item">
                   <div class="ata-data">${fmtData(a.data)}</div>
                   <div class="ata-pessoas">${a.participantes}</div>
-                  ${a.qtdAcoes > 0 ? `<div class="ata-acoes-badge">${a.qtdAcoes} ação(ões)</div>` : ""}
-                  ${a.link ? `<a class="ver-pdf" href="${a.link}" target="_blank">📄 PDF</a>` : ""}
+                  ${a.qtdAcoes>0?`<div class="ata-acoes-badge">${a.qtdAcoes} ação(ões)</div>`:""}
+                  ${a.link?`<a class="ver-pdf" href="${a.link}" target="_blank">📄 PDF</a>`:""}
                 </div>`).join("")
           }
         </div>
       </div>`;
   });
 
-  document.getElementById("conteudo").innerHTML = html;
+  document.getElementById("cont-reunioes").innerHTML = html;
+}
+
+function renderAcoes() {
+  if (!dadosAcoes) return;
+  const filtro = document.getElementById("sel-filtro-acao").value;
+  const hoje   = new Date(); hoje.setHours(0,0,0,0);
+
+  const porPessoa = {};
+  dadosAcoes.forEach(a => {
+    const atrasada = a.status==="Pendente" && a.prazo && new Date(a.prazo+"T12:00:00") < hoje;
+    if (filtro==="atrasada" && !atrasada) return;
+    if (filtro==="Pendente" && a.status!=="Pendente") return;
+    if (filtro==="Concluída" && a.status!=="Concluída") return;
+
+    const nome = a.responsavel || "Sem responsável";
+    if (!porPessoa[nome]) porPessoa[nome] = {concluidas:0,pendentes:0,atrasadas:0,acoes:[]};
+    if (a.status==="Concluída")  porPessoa[nome].concluidas++;
+    else if (atrasada)           porPessoa[nome].atrasadas++;
+    else                         porPessoa[nome].pendentes++;
+    porPessoa[nome].acoes.push({...a, atrasada});
+  });
+
+  const nomes = Object.keys(porPessoa).sort();
+  if (!nomes.length) {
+    document.getElementById("cont-acoes").innerHTML =
+      '<div class="sem-reunioes" style="padding:40px;text-align:center">Nenhuma ação encontrada.</div>';
+    return;
+  }
+
+  let html = "";
+  nomes.forEach((nome,idx)=>{
+    const p = porPessoa[nome];
+    html += `
+      <div class="resp-card" id="rcard-${idx}">
+        <div class="resp-header" onclick="toggleResp(${idx})">
+          <div class="resp-nome">👤 ${nome}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="resp-pills">
+              ${p.concluidas>0?`<span class="rpill rpill-verde">✅ ${p.concluidas}</span>`:""}
+              ${p.pendentes>0?`<span class="rpill rpill-orange">⏳ ${p.pendentes}</span>`:""}
+              ${p.atrasadas>0?`<span class="rpill rpill-red">🚨 ${p.atrasadas}</span>`:""}
+            </div>
+            <span class="chevron" id="rchev-${idx}">▾</span>
+          </div>
+        </div>
+        <div class="acoes-list" id="rlist-${idx}" style="display:none">
+          ${p.acoes.map(a=>{
+            const icone = a.status==="Concluída"?"✅":a.atrasada?"🚨":"⏳";
+            const prazoClass = a.atrasada?"prazo-vencido":"";
+            const prazoStr = a.prazo ? fmtData(a.prazo) : "Sem prazo";
+            const conclusao = a.dataConclusao ? ` · Concluída em ${fmtData(a.dataConclusao)}` : "";
+            return `
+              <div class="acao-item">
+                <div class="acao-icone">${icone}</div>
+                <div class="acao-info">
+                  <div class="acao-desc">${a.acao}</div>
+                  <div class="acao-meta">
+                    ${a.area} · ${fmtData(a.dataReuniao)}
+                    · <span class="${prazoClass}">Prazo: ${prazoStr}</span>
+                    ${conclusao}
+                  </div>
+                </div>
+              </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  });
+
+  document.getElementById("cont-acoes").innerHTML = html;
 }
 
 function toggleCard(idx) {
   const list = document.getElementById(`list-${idx}`);
   const chev = document.getElementById(`chev-${idx}`);
-  const open = list.style.display === "none";
-  list.style.display = open ? "block" : "none";
+  const open = list.style.display==="none";
+  list.style.display = open?"block":"none";
   chev.classList.toggle("open", open);
 }
 
-carregar();
-setInterval(carregar, 60000); // atualiza a cada minuto
+function toggleResp(idx) {
+  const list = document.getElementById(`rlist-${idx}`);
+  const chev = document.getElementById(`rchev-${idx}`);
+  const open = list.style.display==="none";
+  list.style.display = open?"block":"none";
+  chev.classList.toggle("open", open);
+}
+
+function fmtData(str) {
+  if (!str) return "—";
+  try { return new Date(str+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"}); }
+  catch(e){ return str; }
+}
+
+popularMeses();
+carregarReunioes();
+setInterval(()=>{ if(abaAtual==="reunioes") carregarReunioes(); }, 60000);
 </script>
 </body>
 </html>
