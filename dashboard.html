@@ -175,7 +175,7 @@ const STATUS_LABEL = {
 function popularMeses() {
   const sel   = document.getElementById("sel-mes");
   const hoje  = new Date();
-  const inicio = new Date(2026, 4, 1); // maio/2026
+  const inicio = new Date(2026, 3, 1); // abril/2026 — quando o sistema começou
 
   let d = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   while (d >= inicio) {
