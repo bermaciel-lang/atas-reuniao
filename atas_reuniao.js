@@ -1,51 +1,56 @@
 // ============================================================
 // SISTEMA DE ATAS DE REUNIÃO — Orgânico do Chico  v3
 // ============================================================
-// ⚙️  PREENCHA AS 4 VARIÁVEIS ABAIXO
-// ============================================================
 
-const SPREADSHEET_ID  = "1lqtTSH238fzG5gJ_31VeJ61dbLK1i0UXEMioJBnVIyU";
-const DRIVE_FOLDER_ID = "16WDblZKEWRpuApX82qC9E2LbGQ1mlmch";
-
-// Z-API — cole aqui depois de criar a instância em z-api.io
-const ZAPI_INSTANCE   = "3F2630320F71D193AB6962108CBB360D";   // ex: 3DF5A2B1C4D...
-const ZAPI_TOKEN      = "33A064CB1201CA3C5B2C6F6A";          // ex: F23K9ABC...
+const SPREADSHEET_ID      = "1lqtTSH238fzG5gJ_31VeJ61dbLK1i0UXEMioJBnVIyU";
+const DRIVE_FOLDER_ID     = "16WDblZKEWRpuApX82qC9E2LbGQ1mlmch";
+const EVOLUTION_URL       = "https://evolution-api-production-32ab.up.railway.app";
+const EVOLUTION_KEY       = "organico123";
+const EVOLUTION_INSTANCE  = "organico";
 
 
 // ============================================================
-// doGet — serve dados para o formulário e o dashboard
+// doGet
 // ============================================================
 function doGet(e) {
   const action = e?.parameter?.action || "";
-
-  if (action === "participantes") {
-    const area = e.parameter.area || "";
-    return _json(buscarParticipantesArea(area));
-  }
-  if (action === "padrao_area") {
-    const area = e.parameter.area || "";
-    return _json(buscarNomesPadraoArea(area));
-  }
-  if (action === "todos_participantes") {
-    return _json(buscarTodosParticipantes());
-  }
-  if (action === "dashboard") {
-    return _json(dadosDashboard());
-  }
-  if (action === "configuracoes") {
-    return _json(buscarConfiguracoes());
-  }
-
+  if (action === "participantes")       return _json(buscarParticipantesArea(e.parameter.area || ""));
+  if (action === "padrao_area")         return _json(buscarNomesPadraoArea(e.parameter.area || ""));
+  if (action === "todos_participantes") return _json(buscarTodosParticipantes());
+  if (action === "dashboard")           return _json(dadosDashboard());
+  if (action === "configuracoes")       return _json(buscarConfiguracoes());
   return _json({ status: "ok" });
 }
 
 
 // ============================================================
-// doPost — recebe o formulário de ata
+// doPost — recebe formulário de ata E webhook do Z-API
 // ============================================================
 function doPost(e) {
   try {
-    const dados = JSON.parse(e.postData.contents);
+    _log("=== doPost chamado ===");
+    const raw = e.postData.contents;
+    _log("Raw: " + raw.substring(0, 500));
+    
+    const dados = JSON.parse(raw);
+    _log("event: " + dados.event);
+
+    if (dados.event === "messages.upsert" || dados.event === "messages.update") {
+      const msg      = dados.data?.message || dados.data;
+      const fromMe   = msg?.key?.fromMe || false;
+      _log("fromMe: " + fromMe);
+      if (fromMe) return _ok("ignorado");
+      const telefone = (msg?.key?.remoteJid || "").replace("@s.whatsapp.net","").replace("@c.us","");
+      const texto    = msg?.message?.conversation
+                    || msg?.message?.extendedTextMessage?.text
+                    || msg?.message?.buttonsResponseMessage?.selectedButtonId
+                    || "";
+      _log("telefone: " + telefone + " | texto: " + texto);
+      if (telefone && texto) processarRespostaWhatsApp(telefone, texto);
+      return _ok("webhook processado");
+    }
+
+    _log("evento nao reconhecido: " + JSON.stringify(dados).substring(0, 300));
 
     if (dados.telefone && dados.resposta) {
       processarRespostaWhatsApp(dados.telefone, dados.resposta);
@@ -56,10 +61,10 @@ function doPost(e) {
     registrarNaPlanilha(dados, linkDrive);
     enviarAtaWhatsApp(dados, linkDrive);
     criarProximaReuniaoCalendario(dados, linkDrive);
-
     return _ok(linkDrive);
 
   } catch (err) {
+    _log("ERRO: " + err.message);
     return _erro(err.message);
   }
 }
@@ -68,29 +73,22 @@ function doPost(e) {
 // ============================================================
 // PARTICIPANTES
 // ============================================================
-// Retorna os NOMES padrão de uma área (colunas F-O da aba Configurações)
 function buscarNomesPadraoArea(area) {
   const ss  = SpreadsheetApp.openById(SPREADSHEET_ID);
   const aba = ss.getSheetByName("Configurações");
   if (!aba) return [];
   const linha = aba.getDataRange().getValues().slice(1).find(r => String(r[0]).trim() === area);
   if (!linha) return [];
-  // Colunas F-O = índices 5 a 14
   return linha.slice(5, 15).map(v => String(v).trim()).filter(v => v);
 }
 
-// Retorna participantes de uma área com contato completo
-// Lê os nomes padrão da Configurações e busca o contato na aba Participantes
 function buscarParticipantesArea(area) {
   const nomes = buscarNomesPadraoArea(area);
   if (!nomes.length) return [];
   const todos = buscarTodosParticipantes();
-  return nomes
-    .map(nome => todos.find(p => p.nome === nome) || { nome, telefone: "", email: "" })
-    .filter(p => p.nome);
+  return nomes.map(nome => todos.find(p => p.nome === nome) || { nome, telefone: "", email: "" });
 }
 
-// Retorna todos os participantes da aba Participantes (ordem alfabética, sem duplicatas)
 function buscarTodosParticipantes() {
   const ss  = SpreadsheetApp.openById(SPREADSHEET_ID);
   const aba = ss.getSheetByName("Participantes");
@@ -111,15 +109,13 @@ function buscarConfiguracoes() {
   const ss  = SpreadsheetApp.openById(SPREADSHEET_ID);
   const aba = ss.getSheetByName("Configurações");
   if (!aba) return [];
-  return aba.getDataRange().getValues()
-    .slice(1)
-    .map(r => ({
-      area:       String(r[0]).trim(),
-      frequencia: String(r[1]).trim(),
-      dia:        String(r[2]).trim(),
-      horario:    String(r[3]).trim(),
-      ativo:      String(r[4]).trim() === "Sim",
-    }));
+  return aba.getDataRange().getValues().slice(1).map(r => ({
+    area: String(r[0]).trim(), frequencia: String(r[1]).trim(),
+    dia:  String(r[2]).trim(), horario: r[3] instanceof Date
+  ? Utilities.formatDate(r[3], "America/Sao_Paulo", "HH:mm")
+  : String(r[3]).trim(),
+    ativo: String(r[4]).trim() === "Sim",
+  }));
 }
 
 
@@ -131,10 +127,10 @@ function dadosDashboard() {
   const abaAtas = ss.getSheetByName("Atas");
   const abaAco  = ss.getSheetByName("Ações");
   const configs = buscarConfiguracoes();
-
-  const hoje      = new Date();
+  const hoje    = new Date();
   const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMes    = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+  const semanas   = Math.round(fimMes.getDate() / 7);
 
   const todasAtas = abaAtas ? abaAtas.getDataRange().getValues().slice(1) : [];
   const atasMes   = todasAtas.filter(r => {
@@ -143,15 +139,12 @@ function dadosDashboard() {
     return d >= inicioMes && d <= fimMes;
   });
 
-  const semanas = Math.round(fimMes.getDate() / 7);
-
   const areas = configs.map(c => {
     const atasDaArea = atasMes.filter(r => r[1] === c.area);
     let esperadas = 0;
     if (c.frequencia === "Semanal")   esperadas = semanas;
     if (c.frequencia === "Quinzenal") esperadas = Math.ceil(semanas / 2);
     if (c.frequencia === "Mensal")    esperadas = 1;
-
     const realizadas = atasDaArea.length;
     let status = "sem_periodicidade";
     if (esperadas > 0) {
@@ -159,7 +152,6 @@ function dadosDashboard() {
       else if (realizadas > 0)      status = "parcial";
       else                          status = "atrasada";
     }
-
     return {
       area: c.area, frequencia: c.frequencia, esperadas, realizadas, status,
       atas: atasDaArea.map(r => ({
@@ -169,10 +161,10 @@ function dadosDashboard() {
     };
   });
 
-  const acoes     = abaAco ? abaAco.getDataRange().getValues().slice(1) : [];
-  const pendentes = acoes.filter(r => r[7] === "Pendente").length;
-  const concluidas= acoes.filter(r => r[7] === "Concluída").length;
-  const atrasadas = acoes.filter(r => {
+  const acoes      = abaAco ? abaAco.getDataRange().getValues().slice(1) : [];
+  const pendentes  = acoes.filter(r => r[7] === "Pendente").length;
+  const concluidas = acoes.filter(r => r[7] === "Concluída").length;
+  const atrasadas  = acoes.filter(r => {
     if (r[7] !== "Pendente" || !r[6]) return false;
     const prazo = new Date(r[6] + "T12:00:00"); prazo.setHours(0,0,0,0);
     const h = new Date(); h.setHours(0,0,0,0);
@@ -181,8 +173,7 @@ function dadosDashboard() {
 
   return {
     mes: hoje.toLocaleDateString("pt-BR", { month:"long", year:"numeric" }),
-    areas,
-    acoes: { pendentes, concluidas, atrasadas },
+    areas, acoes: { pendentes, concluidas, atrasadas },
   };
 }
 
@@ -194,9 +185,8 @@ function gerarAtaNoDrive(dados) {
   const pasta   = DriveApp.getFolderById(DRIVE_FOLDER_ID);
   const dataFmt = _data(dados.data);
   const nomeArq = `Ata - ${dados.tipo} - ${dataFmt}`;
-
-  const doc  = DocumentApp.create(nomeArq);
-  const body = doc.getBody();
+  const doc     = DocumentApp.create(nomeArq);
+  const body    = doc.getBody();
 
   const estiloTit = {};
   estiloTit[DocumentApp.Attribute.BOLD]                 = true;
@@ -213,10 +203,10 @@ function gerarAtaNoDrive(dados) {
   dados.participantes.forEach(p => body.appendListItem(p.nome));
 
   _secao(body, "ASSUNTOS DISCUTIDOS");
-  dados.topicos.forEach((t, i) => body.appendParagraph(`${i + 1}. ${t}`));
+  (dados.topicos||[]).forEach((t, i) => body.appendParagraph(`${i + 1}. ${t}`));
 
   _secao(body, "AÇÕES DEFINIDAS");
-  if (!dados.acoes.length) {
+  if (!dados.acoes || !dados.acoes.length) {
     body.appendParagraph("Nenhuma ação definida nesta reunião.");
   } else {
     dados.acoes.forEach((a, i) => {
@@ -232,7 +222,7 @@ function gerarAtaNoDrive(dados) {
 
   doc.saveAndClose();
   const docFile = DriveApp.getFileById(doc.getId());
-  const pdf     = docFile.getAs("application/pdf");
+  const pdf = docFile.getAs("application/pdf");
   pdf.setName(nomeArq + ".pdf");
   const pdfFile = pasta.createFile(pdf);
   docFile.setTrashed(true);
@@ -250,16 +240,15 @@ function registrarNaPlanilha(dados, linkDrive) {
   let abaAtas = ss.getSheetByName("Atas");
   if (!abaAtas) {
     abaAtas = ss.insertSheet("Atas");
-    abaAtas.appendRow(["ID", "Área", "Data", "Participantes", "Qtd Ações", "Link PDF"]);
+    abaAtas.appendRow(["ID","Área","Data","Participantes","Qtd Ações","Link PDF"]);
     abaAtas.setFrozenRows(1);
     _estiloCabecalho(abaAtas);
   }
-
   const idAta = "ATA-" + Utilities.formatDate(new Date(), "America/Sao_Paulo", "yyyyMMdd-HHmmss");
   abaAtas.appendRow([
     idAta, dados.tipo, dados.data,
     dados.participantes.map(p => p.nome).join(", "),
-    dados.acoes.filter(a => a.descricao.trim()).length,
+    (dados.acoes||[]).filter(a => a.descricao && a.descricao.trim()).length,
     linkDrive,
   ]);
 
@@ -270,47 +259,60 @@ function registrarNaPlanilha(dados, linkDrive) {
     abaAcoes.setFrozenRows(1);
     _estiloCabecalho(abaAcoes);
   }
-
-  dados.acoes.forEach(a => {
-    if (!a.descricao.trim()) return;
-    abaAcoes.appendRow([idAta, dados.tipo, dados.data, a.descricao, a.responsavelNome, a.responsavelTelefone, a.prazo||"", "Pendente", ""]);
+  (dados.acoes||[]).forEach(a => {
+    if (!a.descricao || !a.descricao.trim()) return;
+    abaAcoes.appendRow([idAta, dados.tipo, dados.data, a.descricao, a.responsavelNome||"", a.responsavelTelefone||"", a.prazo||"", "Pendente", ""]);
   });
 }
 
 
 // ============================================================
-// ENVIA ATA POR WHATSAPP
+// ENVIA ATA + AÇÕES POR WHATSAPP (mensagens separadas)
 // ============================================================
 function enviarAtaWhatsApp(dados, linkDrive) {
   const dataFmt = _data(dados.data);
+
+  // Mensagem 1 — ata para todos
+  let msgAta = `📋 *ATA DE REUNIÃO*\n*${dados.tipo}* — ${dataFmt}\n\n`;
+  msgAta += `*Participantes:*\n` + dados.participantes.map(x => `• ${x.nome}`).join("\n") + "\n\n";
+  msgAta += `*Assuntos discutidos:*\n` + (dados.topicos||[]).map((t,i) => `${i+1}. ${t}`).join("\n") + "\n\n";
+  msgAta += `📄 *Ata completa (PDF):*\n${linkDrive}`;
+
   dados.participantes.forEach(p => {
     if (!p.telefone) return;
-    let msg = `📋 *ATA DE REUNIÃO*\n*${dados.tipo}* — ${dataFmt}\n\n`;
-    msg += `*Participantes:*\n` + dados.participantes.map(x => `• ${x.nome}`).join("\n") + "\n\n";
-    msg += `*Assuntos discutidos:*\n` + dados.topicos.map((t, i) => `${i+1}. ${t}`).join("\n") + "\n\n";
-    if (dados.acoes.length > 0) {
-      msg += `*Ações definidas:*\n`;
-      dados.acoes.forEach((a, i) => {
-        msg += `${i+1}. ${a.descricao}\n   👤 ${a.responsavelNome}  📅 ${a.prazo ? _data(a.prazo) : "sem prazo"}\n`;
-      });
-      msg += "\n";
-    }
-    msg += `📄 *Ata completa (PDF):*\n${linkDrive}`;
-    _whatsapp(p.telefone, msg);
+    _whatsapp(p.telefone, msgAta);
+    Utilities.sleep(600);
+  });
+
+  // Mensagem 2 — ações agrupadas por responsável
+  const acoesPorPessoa = {};
+  (dados.acoes||[]).forEach(a => {
+    if (!a.descricao || !a.responsavelTelefone) return;
+    const tel = a.responsavelTelefone;
+    if (!acoesPorPessoa[tel]) acoesPorPessoa[tel] = { nome: a.responsavelNome, acoes: [] };
+    acoesPorPessoa[tel].acoes.push(a);
+  });
+
+  Object.entries(acoesPorPessoa).forEach(([tel, pessoa]) => {
+    const primeiroNome = pessoa.nome.split(" ")[0];
+    let msgAcoes = `📌 *Suas ações — ${dados.tipo}*\n\nOlá, ${primeiroNome}! Aqui estão as ações que ficaram com você:\n\n`;
+    pessoa.acoes.forEach((a, i) => {
+      msgAcoes += `${i+1}. ${a.descricao}\n   📅 Prazo: ${a.prazo ? _data(a.prazo) : "Sem prazo"}\n\n`;
+    });
+    msgAcoes += `Você receberá lembretes automáticos antes do prazo.\n✅ Responda *SIM* quando concluir | ⏳ Responda *NÃO* se ainda pendente`;
+    _whatsapp(tel, msgAcoes);
     Utilities.sleep(600);
   });
 }
 
-
-// ============================================================
-// LEMBRETE DIÁRIO DE AÇÕES — roda todo dia às 8h
-// Avisa: 1 dia antes do prazo, no dia do prazo, e ações atrasadas
-// ============================================================
 function enviarLembretesAcoes() {
+  // Não envia sábado (6) ou domingo (0)
+  const diaSemana = new Date().getDay();
+  if (diaSemana === 0 || diaSemana === 6) return;
+
   const ss       = SpreadsheetApp.openById(SPREADSHEET_ID);
   const abaAcoes = ss.getSheetByName("Ações");
   if (!abaAcoes) return;
-
   const linhas = abaAcoes.getDataRange().getValues();
   const hoje   = new Date(); hoje.setHours(0, 0, 0, 0);
 
@@ -318,88 +320,117 @@ function enviarLembretesAcoes() {
     const [, reuniao, , acao, responsavel, telefone, prazoRaw, status] = linhas[i];
     if (status === "Concluída" || !telefone || !prazoRaw) continue;
 
-    const prazo = new Date(prazoRaw + "T12:00:00"); prazo.setHours(0, 0, 0, 0);
-    const diff  = Math.round((prazo - hoje) / 864e5);
+    const prazoDate = prazoRaw instanceof Date
+      ? new Date(prazoRaw.getFullYear(), prazoRaw.getMonth(), prazoRaw.getDate())
+      : new Date(String(prazoRaw).split("T")[0] + "T12:00:00");
+    const diff = Math.round((prazoDate - hoje) / 864e5);
 
-    let msg = "";
-    if (diff === 1) {
-      msg = `⏰ *Lembrete de prazo — amanhã*\n\nOlá, ${responsavel}!\n\nSua ação da reunião de *${reuniao}* vence *amanhã*:\n\n📌 ${acao}\n\nJá concluiu?\n✅ Responda *SIM* para marcar como concluída\n⏳ Responda *NÃO* se ainda está em andamento`;
-    } else if (diff === 0) {
-      msg = `🔴 *Prazo hoje!*\n\nOlá, ${responsavel}!\n\nEsta ação vence *hoje*:\n\n📌 ${acao}\n_(Reunião: ${reuniao})_\n\nJá concluiu?\n✅ Responda *SIM*\n⏳ Responda *NÃO*`;
-    } else if (diff < 0) {
-      msg = `🚨 *Ação atrasada ${Math.abs(diff)} dia(s)!*\n\nOlá, ${responsavel}!\n\n📌 ${acao}\n_(Reunião: ${reuniao})_\n\nJá concluiu?\n✅ Responda *SIM*\n⏳ Responda *NÃO*`;
-    }
+    let titulo = "";
+    if      (diff === 1) titulo = `⏰ Lembrete — prazo amanhã`;
+    else if (diff === 0) titulo = `🔴 Prazo hoje!`;
+    else if (diff < 0)   titulo = `🚨 Ação atrasada ${Math.abs(diff)} dia(s)!`;
+    else continue;
 
-    if (msg) { _whatsapp(telefone, msg); Utilities.sleep(600); }
+    const prazoFmt = Utilities.formatDate(prazoDate, "America/Sao_Paulo", "dd/MM/yyyy");
+    const msg = `${titulo}\n\nOlá, ${responsavel}!\n\n📌 ${acao}\n_(Reunião: ${reuniao} | Prazo: ${prazoFmt})_\n\nJá concluiu essa ação?\n\n*Digite 1* para confirmar que concluiu ✅\n*Digite 2* se ainda está em andamento ⏳`;
+
+    _whatsapp(telefone, msg);
+    Utilities.sleep(800);
   }
 }
 
-
-// ============================================================
-// LEMBRETE DE REUNIÃO — roda a cada hora
-// Avisa 2h antes de cada reunião agendada
-// ============================================================
 function enviarLembreteReuniao() {
-  const configs = buscarConfiguracoes();
-  const agora   = new Date();
-  const agoraH  = agora.getHours();
-  const agoraM  = agora.getMinutes();
-  const diaSemana = agora.getDay(); // 0=Dom, 1=Seg...
+  // Não envia sábado (6) ou domingo (0)
+  const agora     = new Date();
+  const diaSemana = agora.getDay();
+  if (diaSemana === 0 || diaSemana === 6) return;
 
-  const mapDia = { "Domingo":0,"Segunda":1,"Terça":2,"Quarta":3,"Quinta":4,"Sexta":5,"Sábado":6 };
+  const configs = buscarConfiguracoes();
+  const mapDia  = { "Domingo":0,"Segunda":1,"Terça":2,"Quarta":3,"Quinta":4,"Sexta":5,"Sábado":6 };
+  const horaAgora = agora.getHours();
 
   configs.forEach(c => {
-    if (!c.ativo || !c.horario || !c.dia) return;
+    if (!c.ativo || !c.dia || !c.horario) return;
     if (c.frequencia === "Sem reunião periódica") return;
     if (mapDia[c.dia] !== diaSemana) return;
 
-    const [hReuniao, mReuniao] = c.horario.split(":").map(Number);
+    const [hReuniao] = c.horario.split(":").map(Number);
+    const is7h      = horaAgora === 7;
+    const is1hAntes = horaAgora === hReuniao - 1;
 
-    // Verifica se a reunião começa em 2h (±15 min de tolerância)
-    const minutosReuniao = hReuniao * 60 + mReuniao;
-    const minutosAgora   = agoraH * 60 + agoraM;
-    const diff           = minutosReuniao - minutosAgora;
+    if (!is7h && !is1hAntes) return;
 
-    if (diff < 105 || diff > 135) return; // fora da janela de 2h (±15min)
+    const tipoAviso = is1hAntes ? "em 1 hora" : "hoje";
+    const emoji     = is1hAntes ? "⏰" : "📅";
 
-    // Busca participantes da área
-    const participantes = buscarParticipantesArea(c.area);
-    participantes.forEach(p => {
+    buscarParticipantesArea(c.area).forEach(p => {
       if (!p.telefone) return;
-      const msg = `📅 *Lembrete de reunião — em 2 horas*\n\nOlá, ${p.nome}!\n\nVocê tem uma reunião de *${c.area}* hoje às *${c.horario}h*.\n\nPrepare os tópicos que deseja discutir. 💪`;
-      _whatsapp(p.telefone, msg);
+      _whatsapp(p.telefone,
+        `${emoji} *Lembrete de reunião — ${tipoAviso}!*\n\nOlá, ${p.nome}!\n\nVocê tem uma reunião de *${c.area}* hoje às *${c.horario}h*.\n\nPrepare os tópicos que deseja discutir. 💪`
+      );
       Utilities.sleep(600);
     });
   });
 }
 
+function configurarTodosGatilhos() {
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (["enviarLembretesAcoes","enviarLembreteReuniao","enviarLembretes"].includes(t.getHandlerFunction())) {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+
+  // Lembretes de ações — todo dia às 8h Brasília
+  ScriptApp.newTrigger("enviarLembretesAcoes")
+    .timeBased().everyDays(1).atHour(8)
+    .inTimezone("America/Sao_Paulo").create();
+
+  // Lembrete de reunião — a cada hora (verifica se é 7h ou 1h antes)
+  ScriptApp.newTrigger("enviarLembreteReuniao")
+    .timeBased().everyHours(1)
+    .inTimezone("America/Sao_Paulo").create();
+
+  Logger.log("✅ Gatilhos configurados!");
+  Logger.log("   • Lembretes de ações: dias úteis às 8h");
+  Logger.log("   • Lembretes de reunião: dias úteis às 7h + 1h antes");
+}
 
 // ============================================================
-// PROCESSA RESPOSTA SIM/NÃO DO WHATSAPP
+// PROCESSA RESPOSTA (texto digitado OU botão clicado)
 // ============================================================
 function processarRespostaWhatsApp(telefone, mensagem) {
-  const resp = mensagem.trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  if (resp !== "SIM" && resp !== "NAO") return;
+  const resp  = String(mensagem).trim();
+  const isSim = resp === "1" || resp.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"") === "SIM";
+  const isNao = resp === "2" || resp.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"") === "NAO";
+  if (!isSim && !isNao) return;
 
   const ss       = SpreadsheetApp.openById(SPREADSHEET_ID);
   const abaAcoes = ss.getSheetByName("Ações");
   if (!abaAcoes) return;
-
   const linhas   = abaAcoes.getDataRange().getValues();
-  const telBusca = String(telefone).replace(/\D/g, "");
+
+  // Remove tudo exceto números e pega só os últimos 11 dígitos para comparar
+    const telBusca = String(telefone).replace(/\D/g, "").slice(-8);
+
+
+  _log("Buscando telefone: " + telBusca);
 
   for (let i = 1; i < linhas.length; i++) {
-    const telPlan = String(linhas[i][5]).replace(/\D/g, "");
-    const status  = linhas[i][7];
-    const match   = telPlan === telBusca || telPlan === telBusca.slice(-11) || telBusca === telPlan.slice(-11);
+    const telPlan = String(linhas[i][5]).replace(/\D/g, "").slice(-8);
+    const status   = linhas[i][7];
+    
+    _log(`Linha ${i}: telPlan=${telPlan} status=${status} match=${telPlan === telBusca}`);
 
-    if (match && status === "Pendente") {
-      if (resp === "SIM") {
+    if (telPlan === telBusca && status === "Pendente") {
+      if (isSim) {
         abaAcoes.getRange(i+1, 8).setValue("Concluída");
-        abaAcoes.getRange(i+1, 9).setValue(Utilities.formatDate(new Date(), "America/Sao_Paulo", "dd/MM/yyyy"));
+        abaAcoes.getRange(i+1, 9).setValue(
+          Utilities.formatDate(new Date(), "America/Sao_Paulo", "dd/MM/yyyy")
+        );
         _whatsapp(telefone, `✅ Ação marcada como *concluída*! Bom trabalho, ${linhas[i][4]}! 👏`);
+        _log("Ação concluída para " + linhas[i][4]);
       } else {
-        _whatsapp(telefone, `⏳ Entendido! A ação continua como pendente. Qualquer atualização é só responder por aqui.`);
+        _whatsapp(telefone, `⏳ Entendido! A ação continua como pendente.`);
       }
       break;
     }
@@ -408,32 +439,27 @@ function processarRespostaWhatsApp(telefone, mensagem) {
 
 
 // ============================================================
-// CRIA PRÓXIMA REUNIÃO NO GOOGLE AGENDA
+// GOOGLE AGENDA
 // ============================================================
 function criarProximaReuniaoCalendario(dados, linkDrive) {
   const configs = buscarConfiguracoes();
   const config  = configs.find(c => c.area === dados.tipo);
   if (!config || config.frequencia === "Sem reunião periódica" || !config.ativo) return;
-
   const proxima = calcularProximaData(config);
   if (!proxima) return;
-
   const [hora, min] = (config.horario || "09:00").split(":").map(Number);
   const inicio = new Date(proxima); inicio.setHours(hora, min, 0, 0);
   const fim    = new Date(inicio);  fim.setHours(fim.getHours() + 1);
-
   const convidados = dados.participantes.filter(p => p.email).map(p => p.email).join(",");
   if (!convidados) return;
-
   CalendarApp.getDefaultCalendar().createEvent(
-    `Reunião ${dados.tipo} — Orgânico do Chico`,
-    inicio, fim,
+    `Reunião ${dados.tipo} — Orgânico do Chico`, inicio, fim,
     { description: `Reunião periódica de ${dados.tipo}.\n\nÚltima ata: ${linkDrive}`, guests: convidados, sendInvites: true }
   );
 }
 
 function calcularProximaData(config) {
-  const map = { "Domingo":0,"Segunda":1,"Terça":2,"Quarta":3,"Quinta":4,"Sexta":5,"Sábado":6 };
+  const map  = { "Domingo":0,"Segunda":1,"Terça":2,"Quarta":3,"Quinta":4,"Sexta":5,"Sábado":6 };
   const alvo = map[config.dia];
   if (alvo === undefined) return null;
   const d = new Date();
@@ -442,103 +468,39 @@ function calcularProximaData(config) {
   return d;
 }
 
-
-// ============================================================
-// CONFIGURA TODOS OS GATILHOS — rode UMA VEZ só
-// ============================================================
-function configurarTodosGatilhos() {
-  // Remove todos os gatilhos antigos
-  ScriptApp.getProjectTriggers().forEach(t => {
-    const fn = t.getHandlerFunction();
-    if (fn === "enviarLembretesAcoes" || fn === "enviarLembreteReuniao" || fn === "enviarLembretes") {
-      ScriptApp.deleteTrigger(t);
-    }
-  });
-
-  // Lembrete de ações — todo dia às 8h
-  ScriptApp.newTrigger("enviarLembretesAcoes")
-    .timeBased().everyDays(1).atHour(8).create();
-
-  // Lembrete de reunião — a cada hora (verifica se alguma começa em 2h)
-  ScriptApp.newTrigger("enviarLembreteReuniao")
-    .timeBased().everyHours(1).create();
-
-  Logger.log("✅ Gatilhos configurados!");
-  Logger.log("   • Lembretes de ações: todo dia às 8h");
-  Logger.log("   • Lembretes de reunião: verificação a cada hora (avisa 2h antes)");
-}
-
-
-// ============================================================
-// CRIA ABAS DE CONFIGURAÇÃO — rode UMA VEZ só
-// ============================================================
-function criarAbaConfiguracoes() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-
-  let abaCfg = ss.getSheetByName("Configurações");
-  if (!abaCfg) abaCfg = ss.insertSheet("Configurações");
-  else abaCfg.clearContents();
-
-  abaCfg.appendRow(["Área", "Frequência", "Dia da Semana", "Horário", "Ativo"]);
-  _estiloCabecalho(abaCfg);
-
-  [
-    ["Operação",          "Semanal",               "Terça",  "09:00", "Sim"],
-    ["Atendimento",       "Semanal",               "Quarta", "14:00", "Sim"],
-    ["Compras",           "Sem reunião periódica",  "",       "",      "Sim"],
-    ["Financeiro/Fiscal", "Sem reunião periódica",  "",       "",      "Sim"],
-    ["Entregadores",      "Mensal",                 "Segunda","08:00", "Sim"],
-    ["Geral",             "Sem reunião periódica",  "",       "",      "Sim"],
-  ].forEach(r => abaCfg.appendRow(r));
-
-  _dropdown(abaCfg, 2, 2, 6, ["Semanal","Quinzenal","Mensal","Sem reunião periódica"]);
-  _dropdown(abaCfg, 2, 3, 6, ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"]);
-  _dropdown(abaCfg, 2, 5, 6, ["Sim","Não"]);
-  abaCfg.autoResizeColumns(1, 5);
-
-  let abaPart = ss.getSheetByName("Participantes");
-  if (!abaPart) abaPart = ss.insertSheet("Participantes");
-  else abaPart.clearContents();
-
-  abaPart.appendRow(["Área", "Nome", "WhatsApp", "Email (opcional)"]);
-  _estiloCabecalho(abaPart);
-  abaPart.appendRow(["Operação",    "Bernardo",    "31999990000", "bernardo@organico.com.br"]);
-  abaPart.appendRow(["Operação",    "João Silva",  "31988880000", ""]);
-  abaPart.appendRow(["Atendimento", "Maria Santos","31977770000", "maria@organico.com.br"]);
-  abaPart.autoResizeColumns(1, 4);
-
-  Logger.log("✅ Abas criadas! Edite a aba Participantes com os dados reais da equipe.");
-}
-
-
 // ============================================================
 // AUXILIARES
 // ============================================================
 
-// Envia mensagem via Z-API
+// Mensagem de texto simples — Evolution API
 function _whatsapp(telefone, mensagem) {
   const num    = String(telefone).replace(/\D/g, "");
   const numero = num.startsWith("55") ? num : "55" + num;
-
-  const opts = {
+  const opts   = {
     method: "POST",
-    headers: { "Content-Type": "application/json", "client-token": ZAPI_TOKEN },
-    payload: JSON.stringify({ phone: numero, message: mensagem }),
+    headers: { "Content-Type": "application/json", "apikey": EVOLUTION_KEY },
+    payload: JSON.stringify({ number: numero, textMessage: { text: mensagem } }),
     muteHttpExceptions: true,
   };
-
   try {
-    UrlFetchApp.fetch(
-      `https://api.z-api.io/instances/${ZAPI_INSTANCE}/token/${ZAPI_TOKEN}/send-text`,
+    const resp = UrlFetchApp.fetch(
+      `${EVOLUTION_URL}/message/sendText/${EVOLUTION_INSTANCE}`,
       opts
     );
+    Logger.log("Evolution texto " + telefone + ": " + resp.getContentText());
   } catch (err) {
-    console.log(`Erro WhatsApp ${telefone}: ${err.message}`);
+    Logger.log("Erro texto " + telefone + ": " + err.message);
   }
+}
+
+// Mensagem com botões — Evolution API
+function _whatsappBotoes(telefone, mensagem, botoes) {
+  _whatsapp(telefone, mensagem + "\n\n*Digite 1* para confirmar que concluiu ✅\n*Digite 2* se ainda está em andamento ⏳");
 }
 
 function _data(str) {
   if (!str) return "—";
+  if (str instanceof Date) return str.toLocaleDateString("pt-BR");
   return new Date(str + "T12:00:00").toLocaleDateString("pt-BR");
 }
 
@@ -566,4 +528,65 @@ function _ok(info) {
 
 function _erro(msg) {
   return ContentService.createTextOutput(JSON.stringify({ status:"erro", mensagem:msg })).setMimeType(ContentService.MimeType.JSON);
+}
+
+
+// ============================================================
+// TESTES
+// ============================================================
+function testeWhatsApp() {
+  _whatsapp("31994599539", "✅ Teste de texto simples — funcionando!");
+}
+
+function testeCobrancaAcoesReais() {
+  const ss       = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const abaAcoes = ss.getSheetByName("Ações");
+  const linhas   = abaAcoes.getDataRange().getValues();
+
+  for (let i = 1; i < linhas.length; i++) {
+    const [, reuniao, , acao, responsavel, telefone, prazoRaw, status] = linhas[i];
+    if (!telefone) continue;
+
+    // Formata a data independente do tipo
+    let prazoFmt = "Sem prazo";
+    if (prazoRaw) {
+      const d = prazoRaw instanceof Date ? prazoRaw : new Date(prazoRaw);
+      prazoFmt = Utilities.formatDate(d, "America/Sao_Paulo", "dd/MM/yyyy");
+    }
+
+    const msg = `⏰ *Lembrete de prazo — amanhã*\n\nOlá, ${responsavel}!\n\nSua ação da reunião de *${reuniao}* vence *amanhã*:\n\n📌 ${acao}\n   📅 Prazo: ${prazoFmt}\n\nJá concluiu essa ação?`;
+
+    _whatsappBotoes(telefone, msg, [
+      { id: `sim_${i}`, label: "✅ Sim, concluí!" },
+      { id: `nao_${i}`, label: "⏳ Não, ainda pendente" }
+    ]);
+    Logger.log(`Enviado para ${responsavel} (${telefone})`);
+    Utilities.sleep(800);
+  }
+}
+
+function _log(msg) {
+  try {
+    const ss  = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let aba   = ss.getSheetByName("Logs");
+    if (!aba) { aba = ss.insertSheet("Logs"); aba.appendRow(["Data","Mensagem"]); }
+    aba.appendRow([new Date().toLocaleString("pt-BR"), String(msg).substring(0, 500)]);
+  } catch(e) {}
+}
+
+function testeDoPostManual() {
+  const fakeEvent = {
+    postData: {
+      contents: JSON.stringify({
+        event: "messages.upsert",
+        data: {
+          message: {
+            key: { remoteJid: "553194599539@s.whatsapp.net", fromMe: false },
+            message: { conversation: "1" }
+          }
+        }
+      })
+    }
+  };
+  doPost(fakeEvent);
 }
