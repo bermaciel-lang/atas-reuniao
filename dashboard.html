@@ -173,16 +173,19 @@ const STATUS_LABEL = {
 };
 
 function popularMeses() {
-  const sel  = document.getElementById("sel-mes");
-  const hoje = new Date();
-  for (let i = 0; i < 12; i++) {
-    const d   = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+  const sel   = document.getElementById("sel-mes");
+  const hoje  = new Date();
+  const inicio = new Date(2026, 4, 1); // maio/2026
+
+  let d = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  while (d >= inicio) {
     const val = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
     const txt = d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
     const opt = document.createElement("option");
     opt.value = val; opt.textContent = txt;
-    if (i === 0) opt.selected = true;
+    if (d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear()) opt.selected = true;
     sel.appendChild(opt);
+    d.setMonth(d.getMonth() - 1);
   }
 }
 
