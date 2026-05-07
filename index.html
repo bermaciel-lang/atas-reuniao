@@ -131,18 +131,37 @@ const STEPS = [{label:"Reunião"},{label:"Pessoas"},{label:"Pautas"},{label:"Rev
 function novaAcao(){ return {descricao:"",responsavel:"",prazo:""}; }
 function novaPauta(){ return {titulo:"",discussao:"",acoes:[novaAcao()]}; }
 
+const RASCUNHO_KEY = "atas_rascunho";
+
+function carregarRascunho() {
+  try {
+    const s = localStorage.getItem(RASCUNHO_KEY);
+    if (!s) return null;
+    return JSON.parse(s);
+  } catch(e) { return null; }
+}
+
 function App() {
-  const [step, setStep]       = React.useState(0);
+  const rascunho = React.useMemo(() => carregarRascunho(), []);
+  const [step, setStep]       = React.useState(rascunho?.step || 0);
   const [enviando, setEnv]    = React.useState(false);
   const [enviado, setEnviado] = React.useState(false);
   const [linkPDF, setLink]    = React.useState("");
   const [erro, setErro]       = React.useState("");
-  const [form, setForm] = React.useState({
+  const [temRascunho, setTemRascunho] = React.useState(!!rascunho);
+  const [form, setForm] = React.useState(rascunho?.form || {
     area:"", data:hoje(),
     introducao:"",
     participantes:[],
     pautas:[novaPauta()],
   });
+
+  // Salva automaticamente no localStorage sempre que o form ou step mudar
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(RASCUNHO_KEY, JSON.stringify({ form, step }));
+    } catch(e) {}
+  }, [form, step]);
 
   function upd(campo,valor){ setForm(f=>({...f,[campo]:valor})); }
   const progresso = (step/(STEPS.length-1))*100;
@@ -181,15 +200,19 @@ function App() {
 
       const r = await fetch(APP_SCRIPT_URL,{method:"POST",body:JSON.stringify(payload)});
       const json = await r.json();
-      if(json.status==="ok"){setLink(json.info||"");setEnviado(true);}
+      if(json.status==="ok"){
+        try { localStorage.removeItem(RASCUNHO_KEY); } catch(e) {}
+        setLink(json.info||"");setEnviado(true);
+      }
       else throw new Error(json.mensagem||"Erro");
     } catch(e){ setErro("Não foi possível enviar. Verifique sua conexão e tente novamente."); }
     setEnv(false);
   }
 
   function resetar(){
+    try { localStorage.removeItem(RASCUNHO_KEY); } catch(e) {}
     setForm({area:"",data:hoje(),introducao:"",participantes:[],pautas:[novaPauta()]});
-    setEnviado(false);setLink("");setErro("");setStep(0);
+    setEnviado(false);setLink("");setErro("");setStep(0);setTemRascunho(false);
   }
 
   if(enviado) return (
@@ -221,6 +244,12 @@ function App() {
         ))}
       </div>
       <div className="content">
+        {temRascunho && !enviado && (
+          <div style={{background:"#fef3c7",border:"1.5px solid #d97706",borderRadius:"var(--radius-sm)",padding:"10px 14px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:13}}>
+            <span>📝 <strong>Rascunho recuperado</strong> — seus dados foram restaurados.</span>
+            <button onClick={resetar} style={{background:"none",border:"none",color:"#b45309",fontWeight:700,cursor:"pointer",fontSize:13,padding:"2px 6px"}}>Limpar</button>
+          </div>
+        )}
         {step===0 && <StepReuniao form={form} upd={upd}/>}
         {step===1 && <StepParticipantes form={form} upd={upd}/>}
         {step===2 && <StepPautas form={form} upd={upd}/>}

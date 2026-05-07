@@ -159,7 +159,7 @@
 </div>
 
 <script>
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT7ZNgVeFPAsLufZMyzPvloarQngJCKkMzE7QOlxxO7ZlUU2f_DOH081IfR2bLyJkf/exec";
+const APP_SCRIPT_URL = "COLE_A_URL_DO_APP_SCRIPT_AQUI";
 
 let dadosReunioes = null;
 let dadosAcoes    = null;
@@ -173,19 +173,16 @@ const STATUS_LABEL = {
 };
 
 function popularMeses() {
-  const sel   = document.getElementById("sel-mes");
-  const hoje  = new Date();
-  const inicio = new Date(2026, 3, 1); // abril/2026 — quando o sistema começou
-
-  let d = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  while (d >= inicio) {
+  const sel  = document.getElementById("sel-mes");
+  const hoje = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d   = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
     const val = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
     const txt = d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
     const opt = document.createElement("option");
     opt.value = val; opt.textContent = txt;
-    if (d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear()) opt.selected = true;
+    if (i === 0) opt.selected = true;
     sel.appendChild(opt);
-    d.setMonth(d.getMonth() - 1);
   }
 }
 
