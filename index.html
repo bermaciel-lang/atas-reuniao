@@ -323,7 +323,15 @@ function StepParticipantes({form,upd}){
     setCarregando(true);
     fetch(`${APP_SCRIPT_URL}?action=todos_participantes`)
       .then(r=>r.json())
-      .then(lista=>{ setFixos(lista.map(p=>({...p,selecionado:false}))); upd("participantes",[]); })
+      .then(lista=>{
+        const salvos = form.participantes || [];
+        const nomesSalvos = new Set(salvos.map(p=>p.nome));
+        // Marca como selecionado quem já estava salvo no rascunho
+        const comSelecao = lista.map(p=>({...p, selecionado: nomesSalvos.has(p.nome)}));
+        setFixos(comSelecao);
+        // Se não tinha nada salvo, limpa; se tinha, mantém
+        if (salvos.length === 0) upd("participantes",[]);
+      })
       .catch(()=>{ setFixos([]); })
       .finally(()=>setCarregando(false));
   },[]);
